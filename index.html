@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Aussie Money App — FREE DEMO</title>
+<style>
+:root{--navy:#14395b;--navy2:#0e2a44;--gold:#f2b138;--light:#eef2f7;--bad:#c62839;--good:#2e7d32;}
+*{box-sizing:border-box;margin:0}
+body{font-family:"Segoe UI",system-ui,sans-serif;background:var(--light);color:#17324e}
+header{background:var(--navy);color:#fff;padding:14px 18px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+header .logo{display:flex;gap:4px;align-items:flex-end;height:26px;margin-right:6px}
+header .logo i{width:7px;background:var(--gold);border-radius:2px;display:inline-block}
+h1{font-size:1.15rem;margin-right:auto}
+.vbanner{font-size:.72rem;color:#bccfe0;width:100%}
+nav{display:flex;gap:4px;background:var(--navy2);padding:6px 12px;flex-wrap:wrap}
+.tabbtn{background:transparent;border:0;color:#cfe0ee;padding:8px 14px;border-radius:8px 8px 0 0;cursor:pointer;font-size:.95rem}
+.tabbtn.on{background:var(--light);color:var(--navy);font-weight:600}
+main{max-width:1060px;margin:0 auto;padding:16px}
+.tab{display:none}.tab.show{display:block}
+.card{background:#fff;border-radius:12px;padding:16px;margin-bottom:14px;box-shadow:0 1px 4px rgba(20,57,91,.12)}
+.card h2{font-size:1.02rem;margin-bottom:10px;color:var(--navy)}
+table{border-collapse:collapse;width:100%}
+td,th{padding:6px 8px;border-bottom:1px solid #e4ebf2;font-size:.92rem;text-align:left}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+tr.hl td{background:#e8f4e8;color:var(--good);font-weight:700}
+.bad{color:var(--bad)}.good{color:var(--good)}
+input,select,button{font:inherit;padding:6px 8px;border:1px solid #c4d2df;border-radius:8px;background:#fff}
+input.money{width:110px;text-align:right}
+button.primary{background:var(--gold);border:0;font-weight:700;cursor:pointer}
+button.mini{border:0;background:transparent;color:#a44;cursor:pointer}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.stat{background:#fff;border-radius:12px;padding:14px;box-shadow:0 1px 4px rgba(20,57,91,.12)}
+.stat .lbl{font-size:.8rem;color:#5c7astat;color:#5c7a94}
+.stat .big{font-size:1.5rem;font-weight:700;color:var(--navy)}
+.rowbtns{margin-top:10px;display:flex;gap:8px}
+.flash{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:10px 18px;border-radius:10px;opacity:0;pointer-events:none;transition:.3s}
+.flash.show{opacity:1}.flash.bad{background:var(--bad)}
+#savebanner{display:none;background:#fff6e3;border:1px solid var(--gold);padding:8px 12px;border-radius:10px;margin-bottom:12px;font-size:.9rem}
+#savebanner.show{display:block}
+#storagewarn{display:none;background:#fdecee;border:1px solid var(--bad);padding:8px 12px;border-radius:10px;margin-bottom:12px;font-size:.9rem}
+#storagewarn.show{display:block}
+.dsel select{margin-right:4px}
+footer{max-width:1060px;margin:8px auto 40px;padding:0 16px;font-size:.72rem;color:#5c7a94}
+.wm{position:fixed;inset:0;pointer-events:none;z-index:50;display:flex;align-items:center;justify-content:center}
+.wm span{transform:rotate(-28deg);font-size:3.2rem;font-weight:800;color:rgba(20,57,91,.10);white-space:nowrap}
+.demobar{background:var(--gold);color:var(--navy);text-align:center;padding:8px;font-weight:700}
+.demobar a{color:var(--navy)}
+@media(max-width:640px){ td,th{font-size:.82rem;padding:5px 4px} input.money{width:84px} h1{font-size:1rem} }
+</style>
+</head>
+<body>
+<div class="demobar">FREE DEMO — capped &amp; watermarked, no saving. Get the full app on Etsy: <a href="https://www.etsy.com/au/shop/BudgetHubAU?utm_source=demo&utm_medium=app&utm_campaign=applaunch" target="_blank" rel="noopener">BudgetHubAU</a></div>
+<header>
+  <span class="logo"><i style="height:13px"></i><i style="height:19px"></i><i style="height:26px"></i></span>
+  <h1>The Aussie Money App — FREE DEMO</h1>
+  <button id="savebtn" class="primary">Save to file</button>
+  <button id="loadbtn">Load file</button>
+  <input type="file" id="loadfile" accept="application/json,.json" style="display:none">
+  <span class="vbanner">v1.0.0 · FY2026-27 rates (verified 2026-08-05) · your data never leaves this device · not financial advice</span>
+</header>
+<nav>
+  <button class="tabbtn on" data-t="settings">Settings</button>
+  <button class="tabbtn" data-t="takehome">Take-Home</button>
+  <button class="tabbtn" data-t="budget">Budget</button>
+  <button class="tabbtn" data-t="bills">Bills</button>
+  <button class="tabbtn" data-t="dash">Dashboard</button>
+</nav>
+<main>
+  <div id="savebanner">Unsaved changes — use <b>Save to file</b> before you close (files are the real save; browser storage is only a cache).</div>
+  <div id="storagewarn">This browser blocks local storage here (common for files opened directly) — no problem: use <b>Save to file</b> / <b>Load file</b>, that's the designed way.</div>
+
+  <section class="tab show" id="tab-settings"><div class="card">
+    <h2>Set these once</h2>
+    <p style="margin-bottom:10px;font-size:.9rem">How often are you paid?
+      <select id="cadence"><option>Weekly</option><option selected>Fortnightly</option><option>Monthly</option></select>
+      &nbsp; Gross annual salary $ <input id="salary" class="money" inputmode="decimal">
+      &nbsp; <label><input type="checkbox" id="hecs"> I have a HECS/HELP debt</label></p>
+    <p style="font-size:.9rem">Your next/first pay date: <span id="firstpay-slot"></span></p>
+    <p style="margin-top:10px;font-size:.8rem;color:#5c7a94">Dates are dropdowns on purpose — nothing typed the wrong way round. Day counts clamp to real month ends.</p>
+  </div></section>
+
+  <section class="tab" id="tab-takehome"><div class="card">
+    <h2>Take-home pay — FY2026-27 estimate</h2>
+    <table><tbody id="th-table"></tbody></table>
+    <p style="margin-top:8px;font-size:.78rem;color:#5c7a94">Resident rates for salary income: income tax, LITO, Medicare levy (with low-income shade-in), marginal HECS/HELP. Rounding: half-away-from-zero to the cent, matching the published engine. General information only — check your numbers with the ATO or a registered tax agent.</p>
+  </div></section>
+
+  <section class="tab" id="tab-budget"><div class="card">
+    <h2>Budget — per pay cycle</h2>
+    <table><thead><tr><th>Group</th><th>Category</th><th>Planned / pay</th><th>Spent</th><th class="num">Diff</th><th></th></tr></thead>
+    <tbody id="budget-rows"></tbody>
+    <tfoot><tr><td colspan="2"><b>Totals</b></td><td id="budget-planned" class="num"></td><td id="budget-spent" class="num"></td><td></td><td></td></tr>
+    <tr><td colspan="2"><b>Left over each pay</b></td><td colspan="2"></td><td id="leftover" class="num"></td><td></td></tr></tfoot></table>
+    <div class="rowbtns"><button id="addrow">+ Add category</button></div>
+  </div></section>
+
+  <section class="tab" id="tab-bills"><div class="card">
+    <h2>Bills — what they really cost you per pay</h2>
+    <table><thead><tr><th>Bill</th><th>Amount</th><th>How often</th><th>Next due</th><th class="num">Per pay</th><th></th></tr></thead>
+    <tbody id="bill-rows"></tbody>
+    <tfoot><tr><td colspan="4"><b>Total per pay</b></td><td id="bills-total" class="num"></td><td></td></tr></tfoot></table>
+    <div class="rowbtns"><button id="addbill">+ Add bill</button></div>
+  </div></section>
+
+  <section class="tab" id="tab-dash">
+    <div class="grid">
+      <div class="stat"><div class="lbl">Take-home per pay</div><div id="dash-percycle" class="big"></div></div>
+      <div class="stat"><div class="lbl">Planned per pay</div><div id="dash-planned" class="big"></div></div>
+      <div class="stat"><div class="lbl">Left over each pay</div><div id="dash-leftover" class="big"></div></div>
+      <div class="stat"><div class="lbl">Bills per pay</div><div id="dash-bills" class="big"></div></div>
+      <div class="stat"><div class="lbl">Next pay</div><div id="dash-nextpay" class="big" style="font-size:1.05rem"></div></div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <h2>Saving toward: <input id="tgt-label" style="width:160px"> </h2>
+      <p style="font-size:.9rem;margin-bottom:8px">Date: <span id="tgt-date-slot"></span> &nbsp; Plan total $ <span id="tgt-amount-slot"></span> &nbsp; Saved so far $ <span id="tgt-saved-slot"></span></p>
+      <div class="grid">
+        <div class="stat"><div class="lbl">Days to go</div><div id="dash-countdown" class="big"></div></div>
+        <div class="stat"><div class="lbl">Pays until <span id="dash-target-label"></span></div><div id="dash-pays" class="big"></div></div>
+        <div class="stat"><div class="lbl">Set aside each pay</div><div id="dash-perpay" class="big"></div><div id="dash-tstate" style="font-size:.8rem;color:#5c7a94"></div></div>
+      </div>
+    </div>
+  </section>
+</main>
+<div id="flash" class="flash"></div>
+<div class="wm"><span>DEMO — buy the full version</span></div>
+<footer>Designed by Blake Morkham-Calvert, made with AI assistance. General information only — not financial, tax or legal advice. The take-home estimator uses FY2026-27 resident rates for salary income and ignores your personal circumstances.</footer>
+<script>
+"use strict";
+const IS_DEMO = true;
+const DEMO_SEED = {
+  settings:{cadence:"Fortnightly", salary_cents:8500000, hecs:true, first_pay:{y:2026,m:7,d:9}},
+  budget:[{group:"Housing",cat:"Rent / mortgage",planned_cents:90000,spent_cents:90000},
+          {group:"Food",cat:"Groceries",planned_cents:30000,spent_cents:31250},
+          {group:"Transport",cat:"Fuel",planned_cents:8000,spent_cents:6500},
+          {group:"Lifestyle",cat:"Entertainment",planned_cents:4000,spent_cents:0},
+          {group:"Money",cat:"Savings goals",planned_cents:15000,spent_cents:0}],
+  bills:[{name:"Electricity",amount_cents:31000,freq:"Quarterly",next_due:{y:2026,m:9,d:15}},
+         {name:"Internet",amount_cents:8900,freq:"Monthly",next_due:{y:2026,m:8,d:21}},
+         {name:"Streaming bundle",amount_cents:3897,freq:"Monthly",next_due:{y:2026,m:8,d:9}}],
+  target:{label:"Christmas", date:{y:2026,m:12,d:25}, amount_cents:75000, saved_cents:15000}
+};
+/* Aussie Money App — FY2026-27 engine (integer-cents JavaScript port).
+ *
+ * PARITY CONTRACT (playbook §11 app-tier gate): every function mirrors the
+ * verified Python fixture engine op-for-op — same constants, same rounding
+ * conventions, same float operation ORDER — so results are cent-exact against
+ * ALL Python fixture values (parity_diff.mjs proves it, 100% required).
+ *
+ * Rounding conventions (published, from the Python engines):
+ *   r2p1  — ROUND(x,2) half-away-from-zero via floor(|x|*100+0.5)  [P1/P2]
+ *   r2dec — Decimal(str(x)) quantize 0.01 ROUND_HALF_UP            [P3]
+ *   pyRound — Python round(x, n): nearest, ties-to-even            [debts/split]
+ * Money crossing the API is INTEGER CENTS (toCents at the boundary).
+ * Dates are {y,m,d} triples; all arithmetic is UTC-epoch-day based so DST
+ * transitions (Oct 2026 / Apr 2027 in AU) can never shift a pay date.
+ */
+
+
+// --- FY2026-27 constants (must equal the Python source — asserted by diff) --
+const BRACKETS = [[18200, 0.15], [45000, 0.15], [135000, 0.07], [190000, 0.08]];
+const LITO_FULL = 700.0, LITO_T1 = 37500, LITO_T2 = 45000, LITO_T3 = 66667;
+const MEDICARE_RATE = 0.02, MEDICARE_LOWER = 28011;
+const HELP_T1 = 69528, HELP_T2 = 129717, HELP_T3 = 186050;
+const HELP_R1 = 0.15, HELP_R2 = 0.17, HELP_BASE2 = 9028.0, HELP_FLAT = 0.10;
+const FREQ_FACTOR = { Weekly: 52, Fortnightly: 26, Monthly: 12, Quarterly: 4, Yearly: 1 };
+const CYCLE_DAYS = { Fortnightly: 14, Weekly: 7, Monthly: 30 };
+const SPLIT = { Needs: 0.50, Wants: 0.30, Savings: 0.20 };
+const FY_START = { y: 2026, m: 7, d: 1 };
+const FY_END = { y: 2027, m: 6, d: 30 };
+const FAMILY_MEDICARE_LOWER = 47238, FAMILY_MEDICARE_PER_CHILD = 4338;
+const FAMILY_MEDICARE_UPPER = 59047, FAMILY_MEDICARE_UPPER_PER_CHILD = 5423;
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const STREAM_ROWS = 160;
+const STATE_PASSED = "Date has passed — set next year's target date";
+const STATE_FUNDED = "Fully funded — nice work";
+const STATE_LUMP = "Lump-sum top-up";
+const STATE_PERPAY = "Save this every pay";
+const RECON_OK = "All tabs reconciled";
+const RECON_BAD = "CHECK — a formula was changed";
+
+// --- rounding ---------------------------------------------------------------
+function r2p1(x) {
+  // Python: math.floor(abs(x)*100 + 0.5)/100 * sign  (half away from zero)
+  const v = Math.floor(Math.abs(x) * 100 + 0.5) / 100;
+  return x >= 0 ? v : -v;
+}
+
+function decimalDigits(x) {
+  // Shortest round-trip repr, no exponent (money-range values only).
+  let s = String(x);
+  if (s.includes("e") || s.includes("E")) s = x.toFixed(20);
+  let sign = 1;
+  if (s.startsWith("-")) { sign = -1; s = s.slice(1); }
+  const dot = s.indexOf(".");
+  const intPart = dot === -1 ? s : s.slice(0, dot);
+  const fracPart = dot === -1 ? "" : s.slice(dot + 1);
+  return { sign, intPart, fracPart };
+}
+
+function r2dec(x) {
+  // Python: float(Decimal(str(x)).quantize(0.01, ROUND_HALF_UP))
+  const { sign, intPart, fracPart } = decimalDigits(x);
+  let cents = BigInt(intPart) * 100n;
+  const f = fracPart.padEnd(2, "0");
+  cents += BigInt(f.slice(0, 2) || "0");
+  const third = f.charCodeAt(2) - 48; // NaN-safe: <0 when absent
+  if (third >= 5) cents += 1n;        // HALF_UP: remainder >= 0.005
+  return sign * Number(cents) / 100;
+}
+
+function pyRound(x, ndigits) {
+  // Python round(x, n): nearest multiple of 10^-n, ties to even — decided on
+  // the shortest-repr decimal digits (round-trip exact for doubles).
+  const { sign, intPart, fracPart } = decimalDigits(x);
+  const f = fracPart.padEnd(ndigits + 1, "0");
+  let scaled = BigInt(intPart + f.slice(0, ndigits));
+  const next = f.charCodeAt(ndigits) - 48;
+  const rest = f.slice(ndigits + 1).replace(/0+$/, "");
+  if (next > 5 || (next === 5 && rest.length > 0)) scaled += 1n;
+  else if (next === 5 && rest.length === 0 && scaled % 2n === 1n) scaled += 1n;
+  return sign * Number(scaled) / Math.pow(10, ndigits);
+}
+
+const toCents = (x) => Math.round(x * 100);
+
+// --- dates ({y,m,d} triples, DST-proof) -------------------------------------
+const epochDay = (t) => Date.UTC(t.y, t.m - 1, t.d) / 86400000;
+function fromEpochDay(n) {
+  const d = new Date(n * 86400000);
+  return { y: d.getUTCFullYear(), m: d.getUTCMonth() + 1, d: d.getUTCDate() };
+}
+const addDays = (t, n) => fromEpochDay(epochDay(t) + n);
+const daysBetween = (a, b) => epochDay(a) - epochDay(b); // a - b
+const dateLE = (a, b) => epochDay(a) <= epochDay(b);
+const dateLT = (a, b) => epochDay(a) < epochDay(b);
+const monthLastDay = (y, m) => new Date(Date.UTC(y, m, 0)).getUTCDate();
+const isoDate = (t) =>
+  `${t.y}-${String(t.m).padStart(2, "0")}-${String(t.d).padStart(2, "0")}`;
+const parseISO = (s) => {
+  const [y, m, d] = s.split("-").map(Number);
+  return { y, m, d };
+};
+
+// --- FY2026-27 take-home engine (mirrors P1 fixtures.py) --------------------
+function incomeTax(gross) {
+  let s = 0;
+  for (const [t, r] of BRACKETS) if (gross > t) s = s + (gross - t) * r;
+  return r2p1(s);
+}
+
+function lito(gross) {
+  if (gross <= LITO_T1) return LITO_FULL;
+  if (gross <= LITO_T2) return r2p1(LITO_FULL - 0.05 * (gross - LITO_T1));
+  return Math.max(0.0, r2p1(325 - 0.015 * (gross - LITO_T2)));
+}
+
+function medicare(gross) {
+  if (gross <= MEDICARE_LOWER) return 0.0;
+  return r2p1(Math.min(MEDICARE_RATE * gross, 0.10 * (gross - MEDICARE_LOWER)));
+}
+
+function helpRepay(gross, hecs) {
+  if (!hecs || gross <= HELP_T1) return 0.0;
+  if (gross <= HELP_T2) return r2p1(HELP_R1 * (gross - HELP_T1));
+  if (gross <= HELP_T3) return r2p1(HELP_BASE2 + HELP_R2 * (gross - HELP_T2));
+  return r2p1(HELP_FLAT * gross);
+}
+
+function takeHome(gross, hecs, periods) {
+  const tax = incomeTax(gross);
+  const off = lito(gross);
+  const netTax = Math.max(0.0, r2p1(tax - off));
+  const med = medicare(gross);
+  const hlp = helpRepay(gross, hecs);
+  const annual = r2p1(gross - netTax - med - hlp);
+  return {
+    tax_before: tax, lito: off, net_tax: netTax, medicare: med, help: hlp,
+    annual, per_cycle: r2p1(annual / periods), per_month: r2p1(annual / 12),
+    per_week: r2p1(annual / 52),
+  };
+}
+
+// --- P1 cycle/budget maths --------------------------------------------------
+const monthKey = (t) => t.y * 100 + t.m;
+const cycleNo = (t, firstPay, cycleDays) =>
+  Math.floor(daysBetween(t, firstPay) / cycleDays) + 1;
+
+function nperMonths(rate, pay, bal) {
+  // numpy_financial nper(rate, -pay, bal), fv=0, when=end — same op order.
+  if (rate === 0) return bal / pay;
+  const z = -pay / rate;
+  return Math.log(z / (bal + z)) / Math.log(1 + rate);
+}
+
+function p1Expected(fix, data) {
+  const periods = FREQ_FACTOR[fix.freq];
+  const cdays = CYCLE_DAYS[fix.freq];
+  const th = takeHome(fix.gross, fix.hecs, periods);
+  const asAt = parseISO(fix.as_at), first = parseISO(fix.first_pay);
+  const curMonth = monthKey(asAt), curCycle = cycleNo(asAt, first, cdays);
+
+  let plannedSum = 0;
+  for (const [, , , p] of data.budget_rows) plannedSum = plannedSum + p;
+  const plannedTotal = r2p1(plannedSum);
+
+  const byCatMonth = {}, byCatCycle = {};
+  for (const [dISO, cat, , amt] of data.log_rows) {
+    const d = parseISO(dISO);
+    if (monthKey(d) === curMonth)
+      byCatMonth[cat] = r2p1((byCatMonth[cat] || 0) + amt);
+    if (cycleNo(d, first, cdays) === curCycle)
+      byCatCycle[cat] = r2p1((byCatCycle[cat] || 0) + amt);
+  }
+
+  const bills = data.bill_rows.map(([, , amt, fq, dueISO]) => {
+    const annual = r2p1(amt * FREQ_FACTOR[fq]);
+    return [annual, r2p1(annual / periods), daysBetween(parseISO(dueISO), asAt)];
+  });
+
+  const debts = data.debt_rows.map(([, bal, rate, pay]) => {
+    const months = nperMonths(rate / 12, pay, bal);
+    const monthsX = nperMonths(rate / 12, pay + data.debt_extra, bal);
+    let rank = 1;
+    for (const [, b2, rOther] of data.debt_rows)
+      if (b2 > 0 && rOther > rate) rank += 1;
+    return {
+      months: pyRound(months, 1),
+      interest: r2p1(months * pay - bal),
+      months_extra: pyRound(monthsX, 1),
+      rank,
+    };
+  });
+
+  const goals = data.goal_rows.map(([, target, saved, tISO]) => {
+    const cycles = Math.max(1, Math.floor(daysBetween(parseISO(tISO), asAt) / cdays));
+    return { cycles, needed: r2p1((target - saved) / cycles) };
+  });
+
+  const splitDollars = {}, splitPlanned = {};
+  for (const k of Object.keys(SPLIT))
+    splitDollars[k] = r2p1(th.per_cycle * SPLIT[k]);
+  for (const k of Object.keys(SPLIT)) {
+    let s = 0;
+    for (const [, , t, p] of data.budget_rows) if (t === k) s = s + p;
+    splitPlanned[k] = r2p1(s);
+  }
+
+  const monthlyTotals = {};
+  for (const [dISO, , , amt] of data.log_rows) {
+    const k = monthKey(parseISO(dISO));
+    monthlyTotals[k] = r2p1((monthlyTotals[k] || 0) + amt);
+  }
+
+  return {
+    take_home: th, periods, cycle_days: cdays, cur_month: curMonth,
+    cur_cycle: curCycle, planned_total: plannedTotal,
+    planned_annual: r2p1(plannedTotal * periods),
+    leftover: r2p1(th.per_cycle - plannedTotal),
+    by_cat_month: byCatMonth, by_cat_cycle: byCatCycle, bills, debts, goals,
+    split_dollars: splitDollars, split_planned: splitPlanned,
+    monthly_totals: monthlyTotals,
+  };
+}
+
+// --- P2 couples pay-date engine --------------------------------------------
+function streamDatesFY(anchor, step) {
+  let k0 = 0;
+  if (dateLT(anchor, FY_START))
+    k0 = -Math.floor(daysBetween(anchor, FY_START) / step);
+  const out = [];
+  let k = k0;
+  for (;;) {
+    const d = addDays(anchor, step * k);
+    if (dateLT(FY_END, d)) break;
+    if (!dateLT(d, FY_START)) out.push(d);
+    k += 1;
+  }
+  return out;
+}
+
+function monthlyDatesFY(dayOfMonth) {
+  const out = [];
+  let y = FY_START.y, m = FY_START.m;
+  for (let i = 0; i < 12; i++) {
+    out.push({ y, m, d: Math.min(dayOfMonth, monthLastDay(y, m)) });
+    m += 1;
+    if (m === 13) { y += 1; m = 1; }
+  }
+  return out.filter((d) => dateLE(FY_START, d) && dateLE(d, FY_END));
+}
+
+function paysInMonth(dates) {
+  const out = {};
+  for (const d of dates) {
+    const k = d.y * 100 + d.m;
+    out[k] = (out[k] || 0) + 1;
+  }
+  return out;
+}
+
+function partnerExpected(gross, hecs, freq, anchor) {
+  const periods = FREQ_FACTOR[freq];
+  const th = takeHome(gross, hecs, periods);
+  let dates;
+  if (freq === "Fortnightly") dates = streamDatesFY(anchor, 14);
+  else if (freq === "Weekly") dates = streamDatesFY(anchor, 7);
+  else if (freq === "Monthly") dates = monthlyDatesFY(anchor);
+  else throw new Error(freq);
+  return {
+    take_home: th, per_cycle: th.per_cycle, pay_dates_fy: dates,
+    fy_pay_count: dates.length, pays_by_month: paysInMonth(dates),
+  };
+}
+
+function jointMonthlyRollup(pa, pb) {
+  const out = {};
+  for (const p of [pa, pb])
+    for (const [mk, n] of Object.entries(p.pays_by_month))
+      out[mk] = r2p1((out[mk] || 0.0) + n * p.per_cycle);
+  return out;
+}
+
+function fairSplit(netA, netB) {
+  const total = netA + netB;
+  const propA = total <= 0 ? 0.5 : pyRound(netA / total, 4);
+  return { fifty_a: 0.5, prop_a: propA, prop_b: pyRound(1 - propA, 4) };
+}
+
+const bucketsGuard = (percentages) =>
+  Math.abs(percentages.reduce((a, b) => a + b, 0) - 1.0) < 1e-9;
+
+function familyMedicareCheck(combined, dependants) {
+  const lower = FAMILY_MEDICARE_LOWER + FAMILY_MEDICARE_PER_CHILD * dependants;
+  const upper = FAMILY_MEDICARE_UPPER + FAMILY_MEDICARE_UPPER_PER_CHILD * dependants;
+  let status;
+  if (combined <= lower) status = "NO LEVY (at/below family lower threshold)";
+  else if (combined <= upper)
+    status = "REDUCED (ATO works the reduction out at tax time)";
+  else status = "FULL LEVY (above family upper threshold)";
+  return { lower, upper, status };
+}
+
+// --- P3 christmas pay-cycle engine ------------------------------------------
+function clampDate(year, monthName, day) {
+  const m = MONTHS.indexOf(monthName) + 1;
+  return { y: year, m, d: Math.min(day, monthLastDay(year, m)) };
+}
+
+function payStream(cadence, firstPay, payday, n = STREAM_ROWS) {
+  const out = [];
+  if (cadence === "Monthly") {
+    for (let k = 0; k < n; k++) {
+      const tm = firstPay.m - 1 + k;
+      const y = firstPay.y + Math.floor(tm / 12), m = (tm % 12) + 1;
+      out.push({ y, m, d: Math.min(payday, monthLastDay(y, m)) });
+    }
+  } else {
+    const step = cadence === "Weekly" ? 7 : 14;
+    for (let k = 0; k < n; k++) out.push(addDays(firstPay, step * k));
+  }
+  return out;
+}
+
+function paysRemaining(cadence, firstPay, payday, asAt, target) {
+  const anchor = dateLT(asAt, firstPay) ? firstPay : asAt;
+  let count = 0;
+  for (const p of payStream(cadence, firstPay, payday))
+    if (dateLE(anchor, p) && dateLE(p, target)) count += 1;
+  return count;
+}
+
+function nextPay(cadence, firstPay, payday, asAt, target) {
+  const anchor = dateLT(asAt, firstPay) ? firstPay : asAt;
+  for (const p of payStream(cadence, firstPay, payday))
+    if (dateLE(anchor, p) && dateLE(p, target)) return p;
+  return null;
+}
+
+function fundState(planTotal, saved, pays, asAt, target) {
+  if (dateLT(target, asAt)) return [0.0, STATE_PASSED];
+  const remaining = Math.max(0.0, r2dec(planTotal - saved));
+  if (remaining <= 0) return [0.0, STATE_FUNDED];
+  if (pays <= 1) return [remaining, STATE_LUMP];
+  return [r2dec(remaining / pays), STATE_PERPAY];
+}
+
+const remainingTarget = (planTotal, saved) =>
+  Math.max(0.0, r2dec(planTotal - saved));
+
+const rowOver = (budget, spent) =>
+  Math.max(0.0, r2dec((spent || 0) - (budget || 0)));
+
+function rollup(rows, person) {
+  const sel = rows.filter((r) => r.person === person);
+  let b = 0, s = 0, o = 0;
+  for (const r of sel) b = b + (r.budget || 0);
+  for (const r of sel) s = s + (r.spent || 0);
+  for (const r of sel) o = o + rowOver(r.budget, r.spent);
+  return { budget: r2dec(b), spent: r2dec(s), over: r2dec(o) };
+}
+
+function totals(rows) {
+  let p = 0, s = 0, o = 0;
+  for (const r of rows) p = p + (r.budget || 0);
+  for (const r of rows) s = s + (r.spent || 0);
+  for (const r of rows) o = o + rowOver(r.budget, r.spent);
+  return { plan: r2dec(p), spent: r2dec(s), over: r2dec(o) };
+}
+
+function p3Expected(inputs) {
+  const firstPay = clampDate(inputs.pay[2], inputs.pay[1], inputs.pay[0]);
+  const asAt = clampDate(inputs.as_at[2], inputs.as_at[1], inputs.as_at[0]);
+  const target = clampDate(inputs.target[2], inputs.target[1], inputs.target[0]);
+  const payday = inputs.pay[0];
+
+  const tot = totals(inputs.rows);
+  const pays = paysRemaining(inputs.cadence, firstPay, payday, asAt, target);
+  const [perPay, state] = fundState(tot.plan, inputs.saved, pays, asAt, target);
+  const npay = nextPay(inputs.cadence, firstPay, payday, asAt, target);
+
+  const persons = [...new Set(inputs.rows.map((r) => r.person))].sort();
+  const rollups = {};
+  for (const p of persons) rollups[p] = rollup(inputs.rows, p);
+
+  return {
+    first_pay: firstPay, as_at: asAt, target,
+    plan: tot.plan, spent: tot.spent, over: tot.over,
+    saved: inputs.saved,
+    remaining: remainingTarget(tot.plan, inputs.saved),
+    pays, per_pay: perPay, state, next_pay: npay,
+    countdown: Math.max(0, daysBetween(target, asAt)),
+    recon: inputs.break_dash ? RECON_BAD : RECON_OK,
+    rollups,
+  };
+}
+
+
+// ---------- app state (all money = integer cents) ----------
+const SCHEMA_VERSION = 1;
+const APP_VERSION = "1.0.0";
+const RATES_VERIFIED = "2026-08-05";
+const DEFAULT_CATS = [
+ ["Housing","Rent / mortgage"],["Housing","Home & contents insurance"],
+ ["Utilities","Electricity & gas"],["Utilities","Water"],["Utilities","Internet"],["Utilities","Mobile"],
+ ["Food","Groceries"],["Food","Takeaway & dining out"],["Food","Coffee & snacks"],
+ ["Transport","Fuel"],["Transport","Rego & car insurance"],["Transport","Car service & repairs"],["Transport","Public transport / tolls"],
+ ["Health","Health insurance"],["Health","Doctor & pharmacy"],["Health","Gym & sport"],
+ ["Family","Kids & school"],["Family","Pets"],["Family","Gifts & birthdays"],
+ ["Lifestyle","Streaming & subscriptions"],["Lifestyle","Entertainment"],["Lifestyle","Clothing & personal"],["Lifestyle","Holidays"],
+ ["Money","Emergency fund"],["Money","Savings goals"],["Money","Extra debt payments"],["Money","Investing"]];
+const FREQS = ["Weekly","Fortnightly","Monthly","Quarterly","Yearly"];
+const CADENCES = ["Weekly","Fortnightly","Monthly"];
+
+let state = null;
+let dirty = false;
+
+function defaultState(){
+  return {
+    schema_version: SCHEMA_VERSION,
+    settings: {cadence:"Fortnightly", salary_cents:0, hecs:false,
+               first_pay:{y:2026,m:7,d:9}},
+    budget: DEFAULT_CATS.map(([g,c])=>({group:g, cat:c, planned_cents:0, spent_cents:0})),
+    bills: [],
+    target: {label:"Christmas", date:{y:2026,m:12,d:25}, amount_cents:0, saved_cents:0},
+    meta: {}
+  };
+}
+
+// ---------- helpers ----------
+const $  = (q)=>document.querySelector(q);
+const $$ = (q)=>[...document.querySelectorAll(q)];
+function el(tag, attrs, ...kids){
+  const e=document.createElement(tag);
+  for(const [k,v] of Object.entries(attrs||{})){
+    if(k==="class") e.className=v;
+    else if(k.startsWith("on")) e.addEventListener(k.slice(2), v);
+    else e.setAttribute(k, v);
+  }
+  for(const k of kids){ e.append(k); } // strings become text nodes: XSS-safe
+  return e;
+}
+const fmt = (cents)=> (cents<0?"-":"") + "$" + (Math.abs(cents)/100).toLocaleString("en-AU",{minimumFractionDigits:2, maximumFractionDigits:2});
+const centsFromInput = (v)=>{ const n=parseFloat(String(v).replace(/[^0-9.\-]/g,"")); return isFinite(n)? Math.round(n*100) : 0; };
+const todayTriple = ()=>{ const d=new Date(); return {y:d.getFullYear(), m:d.getMonth()+1, d:d.getDate()}; };
+const auDate = (t)=> t? `${String(t.d).padStart(2,"0")} ${MONTHS[t.m-1]} ${t.y}` : "—";
+
+function markDirty(){ dirty=true; $("#savebanner").classList.add("show"); cacheState(); render(); }
+
+// ---------- storage self-check + cache (localStorage = CACHE ONLY) ----------
+let storageOK = false;
+try { localStorage.setItem("__amh_test","1"); storageOK = localStorage.getItem("__amh_test")==="1"; localStorage.removeItem("__amh_test"); } catch(e){ storageOK=false; }
+function cacheState(){ if(!storageOK||IS_DEMO) return; try{ localStorage.setItem("amh_state", JSON.stringify(state)); }catch(e){} }
+function loadCache(){ if(!storageOK) return null; try{ const s=localStorage.getItem("amh_state"); return s? importState(JSON.parse(s)) : null; }catch(e){ return null; } }
+
+// ---------- import validation (file-based load is PRIMARY; XSS-hardened) ----------
+function str(x, max){ return (typeof x==="string"? x : "").slice(0, max||60); }
+function int(x){ const n=Number(x); return Number.isFinite(n)? Math.round(n) : 0; }
+function triple(t, fb){ if(!t||typeof t!=="object") return {...fb};
+  const y=Math.min(2100,Math.max(2020,int(t.y)||fb.y)); const m=Math.min(12,Math.max(1,int(t.m)||fb.m));
+  const d=Math.min(monthLastDay(y,m),Math.max(1,int(t.d)||fb.d)); return {y,m,d}; }
+function importState(raw){
+  if(!raw || typeof raw!=="object" || !raw.settings) throw new Error("Not an Aussie Money App file");
+  const fb=defaultState();
+  const s={ schema_version: SCHEMA_VERSION,
+    settings:{ cadence: CADENCES.includes(raw.settings.cadence)? raw.settings.cadence : "Fortnightly",
+      salary_cents: Math.max(0, Math.min(10_000_000_00, int(raw.settings.salary_cents))),
+      hecs: !!raw.settings.hecs,
+      first_pay: triple(raw.settings.first_pay, fb.settings.first_pay) },
+    budget: (Array.isArray(raw.budget)? raw.budget : []).slice(0, 200).map(r=>({
+      group: str(r.group,30)||"Other", cat: str(r.cat,60)||"Category",
+      planned_cents: Math.max(0,int(r.planned_cents)), spent_cents: Math.max(0,int(r.spent_cents)) })),
+    bills: (Array.isArray(raw.bills)? raw.bills : []).slice(0, 100).map(b=>({
+      name: str(b.name,60)||"Bill", amount_cents: Math.max(0,int(b.amount_cents)),
+      freq: FREQS.includes(b.freq)? b.freq : "Monthly", next_due: triple(b.next_due, fb.target.date) })),
+    target:{ label: str((raw.target||{}).label,40)||"Goal", date: triple((raw.target||{}).date, fb.target.date),
+      amount_cents: Math.max(0,int((raw.target||{}).amount_cents)), saved_cents: Math.max(0,int((raw.target||{}).saved_cents)) },
+    meta:{} };
+  if(!s.budget.length) s.budget=fb.budget;
+  return s;
+}
+
+// ---------- derived numbers (engine calls — cents in/out at the boundary) ----------
+function derive(){
+  const st=state.settings;
+  const periods=FREQ_FACTOR[st.cadence];
+  const th=takeHome(st.salary_cents/100, st.hecs, periods);
+  const thc=Object.fromEntries(Object.entries(th).map(([k,v])=>[k, toCents(v)]));
+  const plan = state.budget.reduce((a,r)=>a+r.planned_cents,0);
+  const spent = state.budget.reduce((a,r)=>a+r.spent_cents,0);
+  const billsPC = state.bills.map(b=>{
+    const annual=r2p1((b.amount_cents/100)*FREQ_FACTOR[b.freq]);
+    return toCents(r2p1(annual/periods));
+  });
+  const billsTotal = billsPC.reduce((a,c)=>a+c,0);
+  const now=todayTriple();
+  const stream=payStream(st.cadence, st.first_pay, st.first_pay.d);
+  const anchor = dateLT(now, st.first_pay)? st.first_pay : now;
+  const next = stream.find(p=>dateLE(anchor,p)) || null;
+  const pays = paysRemaining(st.cadence, st.first_pay, st.first_pay.d, now, state.target.date);
+  const [perPay, tstate] = fundState(state.target.amount_cents/100, state.target.saved_cents/100, pays, now, state.target.date);
+  return { thc, periods, plan, spent, leftover: thc.per_cycle - plan, billsPC, billsTotal,
+           next, nextDays: next? daysBetween(next, now) : null,
+           pays, targetPerPay: toCents(perPay), targetState: tstate,
+           countdown: Math.max(0, daysBetween(state.target.date, now)) };
+}
+
+// ---------- rendering ----------
+const MONTH_OPTS = MONTHS.map((m,i)=>[i+1,m]);
+function dateSelects(t, onchange){
+  const wrap=el("span",{class:"dsel"});
+  const dsel=el("select",{}); for(let d=1;d<=31;d++) dsel.append(el("option",{value:d, ...(t.d===d?{selected:""}:{})}, String(d)));
+  const msel=el("select",{}); for(const [v,n] of MONTH_OPTS) msel.append(el("option",{value:v, ...(t.m===v?{selected:""}:{})}, n));
+  const ysel=el("select",{}); for(let y=2025;y<=2032;y++) ysel.append(el("option",{value:y, ...(t.y===y?{selected:""}:{})}, String(y)));
+  const upd=()=>{ const y=+ysel.value, m=+msel.value, d=Math.min(+dsel.value, monthLastDay(y,m)); onchange({y,m,d}); };
+  [dsel,msel,ysel].forEach(s=>s.addEventListener("change",upd));
+  wrap.append(dsel,msel,ysel); return wrap;
+}
+
+function moneyInput(cents, oninput, opts){
+  const inp=el("input",{type:"text", inputmode:"decimal", class:"money "+((opts||{}).cls||""), value: cents? (cents/100).toFixed(2):""});
+  inp.addEventListener("change", ()=>{ oninput(centsFromInput(inp.value)); inp.value = inp.value===""? "" : (centsFromInput(inp.value)/100).toFixed(2); });
+  return inp;
+}
+
+function render(){
+  const d=derive();
+  // settings
+  $("#salary").value = state.settings.salary_cents? (state.settings.salary_cents/100).toFixed(2) : "";
+  $("#cadence").value = state.settings.cadence;
+  $("#hecs").checked = state.settings.hecs;
+  // take-home table
+  const tt=$("#th-table"); tt.replaceChildren();
+  const rows=[["Gross salary", state.settings.salary_cents],["Income tax (FY2026-27)", d.thc.tax_before],
+    ["LITO offset", -d.thc.lito],["Medicare levy", d.thc.medicare],["HECS/HELP repayment", d.thc.help],
+    ["TAKE-HOME per year", d.thc.annual],[`TAKE-HOME per ${state.settings.cadence.toLowerCase()} pay`, d.thc.per_cycle],
+    ["≈ per month", d.thc.per_month],["≈ per week", d.thc.per_week]];
+  for(const [label,val] of rows){ tt.append(el("tr",{class: label.startsWith("TAKE-HOME")? "hl":""},
+    el("td",{},label), el("td",{class:"num"}, fmt(val)))); }
+  // budget
+  const bt=$("#budget-rows"); bt.replaceChildren();
+  state.budget.forEach((r,i)=>{
+    bt.append(el("tr",{},
+      el("td",{}, r.group), el("td",{}, r.cat),
+      el("td",{}, moneyInput(r.planned_cents, v=>{r.planned_cents=v; markDirty();})),
+      el("td",{}, moneyInput(r.spent_cents, v=>{r.spent_cents=v; markDirty();})),
+      el("td",{class:"num "+(r.spent_cents>r.planned_cents?"bad":"")}, fmt(r.planned_cents - r.spent_cents)),
+      el("td",{}, el("button",{class:"mini", onclick:()=>{state.budget.splice(i,1); markDirty();}},"✕"))));
+  });
+  $("#budget-planned").textContent = fmt(d.plan);
+  $("#budget-spent").textContent = fmt(d.spent);
+  $("#leftover").textContent = fmt(d.leftover);
+  $("#leftover").className = "num "+(d.leftover<0?"bad":"good");
+  // bills
+  const brt=$("#bill-rows"); brt.replaceChildren();
+  state.bills.forEach((b,i)=>{
+    const fsel=el("select",{}); FREQS.forEach(f=>fsel.append(el("option",{value:f, ...(b.freq===f?{selected:""}:{})}, f)));
+    fsel.addEventListener("change",()=>{b.freq=fsel.value; markDirty();});
+    const name=el("input",{type:"text", value:b.name, maxlength:"60"});
+    name.addEventListener("change",()=>{b.name=name.value.slice(0,60); markDirty();});
+    brt.append(el("tr",{},
+      el("td",{}, name),
+      el("td",{}, moneyInput(b.amount_cents, v=>{b.amount_cents=v; markDirty();})),
+      el("td",{}, fsel),
+      el("td",{}, dateSelects(b.next_due, t=>{b.next_due=t; markDirty();})),
+      el("td",{class:"num"}, fmt(d.billsPC[i]||0)),
+      el("td",{}, el("button",{class:"mini", onclick:()=>{state.bills.splice(i,1); markDirty();}},"✕"))));
+  });
+  $("#bills-total").textContent = fmt(d.billsTotal);
+  // dashboard
+  $("#dash-percycle").textContent = fmt(d.thc.per_cycle);
+  $("#dash-planned").textContent = fmt(d.plan);
+  $("#dash-leftover").textContent = fmt(d.leftover);
+  $("#dash-leftover").className = "big "+(d.leftover<0?"bad":"good");
+  $("#dash-bills").textContent = fmt(d.billsTotal);
+  $("#dash-nextpay").textContent = d.next? `${auDate(d.next)} (${d.nextDays===0?"today":"in "+d.nextDays+" day"+(d.nextDays===1?"":"s")})` : "—";
+  $("#dash-pays").textContent = String(d.pays);
+  $("#dash-countdown").textContent = d.countdown + " days";
+  $("#dash-target-label").textContent = state.target.label;
+  $("#dash-perpay").textContent = fmt(d.targetPerPay);
+  $("#dash-tstate").textContent = d.targetState;
+  $("#tgt-label").value = state.target.label;
+}
+
+// ---------- save / load ----------
+function download(){
+  if(IS_DEMO) return;
+  state.meta = {app_version:APP_VERSION, saved_at:new Date().toISOString()};
+  const blob=new Blob([JSON.stringify(state,null,1)],{type:"application/json"});
+  const a=el("a",{href:URL.createObjectURL(blob), download:"aussie-money-app-save.json"});
+  document.body.append(a); a.click(); a.remove();
+  dirty=false; $("#savebanner").classList.remove("show");
+}
+function loadFile(file){
+  const rd=new FileReader();
+  rd.onload=()=>{ try{ state=importState(JSON.parse(rd.result)); dirty=false; $("#savebanner").classList.remove("show"); cacheState(); render(); flash("Loaded ✔"); }
+    catch(e){ flash("Couldn't load that file: "+e.message, true); } };
+  rd.readAsText(file);
+}
+function flash(msg, bad){ const f=$("#flash"); f.textContent=msg; f.className="flash show"+(bad?" bad":""); setTimeout(()=>f.classList.remove("show"), 3500); }
+
+window.addEventListener("beforeunload",(e)=>{ if(dirty && !IS_DEMO){ e.preventDefault(); e.returnValue=""; } });
+
+// ---------- boot ----------
+function boot(){
+  state = (!IS_DEMO && loadCache()) || defaultState();
+  if(IS_DEMO){ state = importState(DEMO_SEED); }
+  // wire static controls
+  $("#cadence").addEventListener("change",()=>{state.settings.cadence=$("#cadence").value; markDirty();});
+  $("#salary").addEventListener("change",()=>{state.settings.salary_cents=Math.max(0,centsFromInput($("#salary").value)); markDirty();});
+  $("#hecs").addEventListener("change",()=>{state.settings.hecs=$("#hecs").checked; markDirty();});
+  $("#firstpay-slot").append(dateSelects(state.settings.first_pay, t=>{state.settings.first_pay=t; markDirty();}));
+  $("#tgt-date-slot").append(dateSelects(state.target.date, t=>{state.target.date=t; markDirty();}));
+  $("#tgt-label").addEventListener("change",()=>{state.target.label=$("#tgt-label").value.slice(0,40); markDirty();});
+  $("#tgt-amount-slot").append(moneyInput(state.target.amount_cents, v=>{state.target.amount_cents=v; markDirty();}));
+  $("#tgt-saved-slot").append(moneyInput(state.target.saved_cents, v=>{state.target.saved_cents=v; markDirty();}));
+  $("#addrow").addEventListener("click",()=>{ if(IS_DEMO && state.budget.length>=5) return flash("Demo is capped at 5 rows — the full app is unlimited", true);
+    state.budget.push({group:"Other", cat:"New category", planned_cents:0, spent_cents:0}); markDirty(); });
+  $("#addbill").addEventListener("click",()=>{ if(IS_DEMO && state.bills.length>=3) return flash("Demo is capped at 3 bills — the full app is unlimited", true);
+    state.bills.push({name:"New bill", amount_cents:0, freq:"Monthly", next_due:todayTriple()}); markDirty(); });
+  $("#savebtn").addEventListener("click", download);
+  $("#loadbtn").addEventListener("click", ()=>$("#loadfile").click());
+  $("#loadfile").addEventListener("change",(e)=>{ if(e.target.files[0]) loadFile(e.target.files[0]); e.target.value=""; });
+  document.body.addEventListener("dragover",(e)=>{ e.preventDefault(); });
+  document.body.addEventListener("drop",(e)=>{ e.preventDefault(); if(!IS_DEMO && e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]); });
+  // tabs
+  $$(".tabbtn").forEach(b=>b.addEventListener("click",()=>{
+    $$(".tabbtn").forEach(x=>x.classList.toggle("on", x===b));
+    $$(".tab").forEach(t=>t.classList.toggle("show", t.id==="tab-"+b.dataset.t));
+  }));
+  if(!storageOK){ $("#storagewarn").classList.add("show"); }
+  if(IS_DEMO){ $("#savebtn").disabled=true; $("#loadbtn").disabled=true; }
+  render();
+}
+document.addEventListener("DOMContentLoaded", boot);
+
+</script>
+</body>
+</html>
