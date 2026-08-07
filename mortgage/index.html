@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aussie Mortgage &amp; Offset Calculator — FREE DEMO</title>
+<style>
+:root{--ink:#12263a;--navy:#14395b;--navy2:#0e2a44;--gold:#f2b138;--paper:#f2f5f9;
+--line:#d9e2ec;--good:#2e7d32;--bad:#c62839;--muted:#5c7a94}
+*{box-sizing:border-box;margin:0}
+body{font-family:"Segoe UI",system-ui,sans-serif;background:var(--paper);color:var(--ink);line-height:1.45}
+header{background:var(--navy);color:#fff;padding:14px 18px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+header .logo{display:flex;gap:4px;align-items:flex-end;height:24px}
+header .logo i{width:6px;background:var(--gold);border-radius:2px}
+h1{font-size:1.08rem;margin-right:auto}
+.vbanner{font-size:.72rem;color:#bccfe0;width:100%}
+main{max-width:1080px;margin:0 auto;padding:16px}
+.card{background:#fff;border-radius:12px;padding:16px;margin-bottom:14px;box-shadow:0 1px 4px rgba(20,57,91,.12)}
+.card h2{font-size:1rem;margin-bottom:10px;color:var(--navy)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+label{display:block;font-size:.82rem;color:var(--muted);margin-bottom:3px}
+input,select,button{font:inherit;padding:7px 9px;border:1px solid #c4d2df;border-radius:8px;background:#fff;width:100%}
+button{cursor:pointer;width:auto}
+button.primary{background:var(--gold);border:0;font-weight:700}
+button.ghost{background:#fff}
+.stat{background:#fff;border-radius:12px;padding:14px;box-shadow:0 1px 4px rgba(20,57,91,.12)}
+.stat .lbl{font-size:.78rem;color:var(--muted)}
+.stat .big{font-size:1.42rem;font-weight:700;color:var(--navy);font-variant-numeric:tabular-nums}
+.stat .big.good{color:var(--good)}
+table{border-collapse:collapse;width:100%;font-size:.86rem}
+td,th{padding:5px 7px;border-bottom:1px solid var(--line);text-align:right}
+th:first-child,td:first-child{text-align:left}
+thead th{background:#eef3f8;color:var(--navy);position:sticky;top:0}
+.scroll{max-height:320px;overflow:auto;border:1px solid var(--line);border-radius:8px}
+.locked{position:relative;overflow:hidden}
+.locked .veil{position:absolute;inset:0;background:rgba(242,245,249,.72);backdrop-filter:blur(6px);
+display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:10px;border-radius:12px}
+.locked .veil b{color:var(--navy);font-size:.95rem}
+.locked .veil span{font-size:.78rem;color:var(--muted);margin:4px 0 8px}
+.blurred{filter:blur(7px);user-select:none}
+.method{background:#fff;border:2px solid var(--gold);border-radius:12px;padding:16px;margin-bottom:14px}
+.method h2{color:var(--navy)}
+.method p,.method li{font-size:.88rem;margin:6px 0}
+.method ul{padding-left:18px}
+.disclaimer{background:#fff8e8;border:1px solid var(--gold);border-radius:10px;padding:10px 12px;font-size:.82rem;margin-bottom:14px}
+.chart{width:100%;height:190px;display:block}
+.demobar{background:var(--gold);color:var(--navy);text-align:center;padding:9px;font-weight:700}
+.demobar a{color:var(--navy)}
+.wm{position:fixed;inset:0;pointer-events:none;z-index:40;display:flex;align-items:center;justify-content:center}
+.wm span{transform:rotate(-27deg);font-size:2.9rem;font-weight:800;color:rgba(20,57,91,.09);white-space:nowrap}
+.rowbtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.pill{display:inline-block;background:#eef3f8;border-radius:999px;padding:2px 9px;font-size:.74rem;color:var(--navy)}
+footer{max-width:1080px;margin:6px auto 40px;padding:0 16px;font-size:.72rem;color:var(--muted)}
+.flash{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;
+padding:10px 18px;border-radius:10px;opacity:0;transition:.3s;pointer-events:none;z-index:60}
+.flash.show{opacity:1}
+@media(max-width:640px){td,th{font-size:.78rem;padding:4px}h1{font-size:.95rem}.stat .big{font-size:1.2rem}}
+</style>
+</head>
+<body>
+<div class="demobar">FREE DEMO — see how it works. The full calculator shows what you save and works offline: <a href="https://www.etsy.com/au/shop/BudgetHubAU?utm_source=demo&utm_medium=app&utm_campaign=mortgage" target="_blank" rel="noopener">get it on Etsy (AU$19.95)</a></div>
+<header>
+  <span class="logo"><i style="height:12px"></i><i style="height:17px"></i><i style="height:24px"></i></span>
+  <h1>Aussie Mortgage &amp; Offset Calculator — FREE DEMO</h1>
+  <button class="ghost" id="methodbtn">Method used</button>
+  <button class="primary" id="runbtn">Calculate</button>
+  
+  <span class="vbanner">v1.0.0 · method checked against ASIC Moneysmart 2026-08-07 ·
+    estimates only, not financial advice · your data stays in your browser</span>
+</header>
+<main>
+  <div class="disclaimer"><b>General information only — not financial advice.</b> This calculator gives estimates, not a quote or a recommendation. We are not licensed financial advisers and we do not hold an AFSL. It does not consider your objectives, financial situation or needs. Your lender's figures will be the ones that count — always check with them or a licensed adviser before making a decision.</div>
+  
+<div class="method" id="method" style="display:none">
+  <h2>How these numbers are worked out</h2>
+  <p>This tool follows the method ASIC's Moneysmart describes for Australian
+  home loans: <em>"Interest on most home loans is calculated daily; each day,
+  your lender subtracts your offset account balance from your loan balance
+  before calculating interest."</em> (moneysmart.gov.au, mortgage offset
+  accounts). It is an <b>estimate</b>, not your lender's figure.</p>
+  <ul>
+    <li>Interest accrues <b>daily</b> on the balance minus your offset, at the
+      annual rate &divide; 365, and is <b>charged monthly in arrears</b> — the
+      standard Australian variable-loan convention.</li>
+    <li><b>Fortnightly repayments use the "half-monthly" convention by
+      default</b> (fortnightly payment = monthly payment &divide; 2), because
+      that is what Australian lenders mean by fortnightly repayments and what
+      produces the well-known payoff saving. A true-fortnightly reamortisation
+      option sits behind the Advanced toggle and is labelled there.</li>
+    <li>Repayments are rounded to the cent; because daily accrual on a 365-day
+      basis charges slightly more than the monthly-compounded quoted payment,
+      a small <b>final payment</b> settles the balance exactly at zero.</li>
+    <li>Moneysmart's own basic mortgage calculator simplifies by compounding at
+      your repayment frequency rather than daily. We model daily accrual
+      because that is how lenders actually charge, and because it is the only
+      honest way to model an offset. Expect small differences against that
+      calculator; both are estimates.</li>
+    <li><b>Not modelled:</b> fees, LMI, stamp duty, redraw rules, interest-only
+      periods, honeymoon rates, repayment holidays, or rate changes your lender
+      makes on their own.</li>
+    <li>Your interest rate is whatever you type in — we do not fetch or
+      forecast rates.</li>
+  </ul>
+  <p>Different lenders round, accrue and charge on slightly different days, so
+  a small difference against your bank's statement is normal and expected. If
+  your figure differs materially, <b>your lender's is the correct one</b>.</p>
+  <div class="rowbtns"><button class="ghost" id="methodclose">Got it</button></div>
+</div>
+
+  <div class="card">
+    <h2>Your loan</h2>
+    <div class="grid">
+      <div><label>Loan balance ($)</label><input id="balance" type="number" min="0" step="1000" value="650000"></div>
+      <div><label>Interest rate (% p.a.)</label><input id="rate" type="number" min="0" step="0.01" value="6.19"></div>
+      <div><label>Term left (years)</label><input id="term" type="number" min="1" max="40" step="1" value="30"></div>
+      <div><label>Repayment frequency</label><select id="freq">
+        <option>Weekly</option><option selected>Fortnightly</option><option>Monthly</option></select></div>
+      <div><label>Offset account balance ($)</label><input id="offset" type="number" min="0" step="1000" value="25000"></div>
+      <div><label>Extra per repayment ($)</label><input id="extra" type="number" min="0" step="50" value="0"></div>
+      <div><label>First repayment date</label><input id="start" type="date" value="2026-08-01"></div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="stat"><div class="lbl" id="s-payment-lbl">Repayment</div><div class="big" id="s-payment">—</div></div>
+    <div class="stat"><div class="lbl">Total interest</div><div class="big" id="s-interest">—</div></div>
+    <div class="stat"><div class="lbl">Loan paid off in</div><div class="big" id="s-term">—</div></div>
+    <div class="stat"><div class="lbl">Payoff date</div><div class="big" id="s-payoff" style="font-size:1.05rem">—</div></div>
+  </div>
+
+  
+  <div class="card locked">
+    <h2>What this saves you</h2>
+    <div class="grid">
+      <div class="stat"><div class="lbl">Interest saved</div>
+        <div class="big good blurred">$&#8202;&mdash;&#8202;&mdash;&#8202;&mdash;</div></div>
+      <div class="stat"><div class="lbl">Time saved</div>
+        <div class="big good blurred">&mdash;&#8202;yr &mdash;&#8202;mth</div></div>
+    </div>
+    <div class="veil">
+      <b>The payoff numbers are in the full calculator</b>
+      <span>See exactly what your offset and fortnightly repayments save —
+        in dollars and in years.</span>
+      <a href="https://www.etsy.com/au/shop/BudgetHubAU?utm_source=demo&utm_medium=app&utm_campaign=mortgage" target="_blank" rel="noopener">
+        <button class="primary">Get the full calculator — AU$19.95</button></a>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Balance over time</h2>
+    <canvas class="chart" id="chart"></canvas>
+  </div>
+
+  <div class="card">
+    <h2>Amortisation schedule</h2>
+    <div class="scroll"><table><thead><tr><th>Month</th><th>Interest</th><th>Principal</th><th>Balance</th></tr></thead>
+    <tbody id="sched"></tbody></table></div>
+  </div>
+
+  
+</main>
+<div id="flash" class="flash"></div>
+<div class="wm"><span>DEMO — free preview</span></div>
+<footer>Designed by Blake Morkham-Calvert, made with AI assistance.
+General information only — not financial advice, not a quote, no AFSL held.
+Estimates follow the method ASIC's Moneysmart describes for Australian home
+loans; your lender's figures are the ones that count.</footer>
+<script>
+"use strict";
+const IS_DEMO = true;
+const BUYLINK = "https://www.etsy.com/au/shop/BudgetHubAU?utm_source=demo&utm_medium=app&utm_campaign=mortgage";
+/* ENGINE-START */
+/* Aussie Mortgage & Offset Calculator — integer-cents engine (JS port).
+ *
+ * PARITY CONTRACT: mirrors mortgage_truth.py op-for-op — same constants,
+ * same rounding (ROUND_HALF_UP on the decimal string), same loop order —
+ * so results are cent-exact against every Python fixture (parity6.mjs
+ * proves it; 100% required, zero tolerance).
+ *
+ * METHOD (ASIC Moneysmart, verified 2026-08-07): interest is calculated
+ * DAILY on (balance - offset) at annual rate / 365, charged MONTHLY in
+ * arrears. Fortnightly defaults to the HALF-MONTHLY convention (monthly/2)
+ * — what AU lenders mean — with true reamortisation behind an Advanced
+ * toggle. Estimate only, never "correct".
+ */
+
+
+const DAYS_BASIS = 365;
+const MAX_MONTHS = 12 * 40;
+
+/* ---- rounding: Python Decimal(str(x)).quantize(1, ROUND_HALF_UP) ---- */
+function roundCents(x) {
+  let s = String(x);
+  if (s.includes("e") || s.includes("E")) s = x.toFixed(20);
+  let sign = 1;
+  if (s.startsWith("-")) { sign = -1; s = s.slice(1); }
+  const dot = s.indexOf(".");
+  const ip = dot === -1 ? s : s.slice(0, dot);
+  const fp = dot === -1 ? "" : s.slice(dot + 1);
+  let n = BigInt(ip || "0");
+  const first = fp.charCodeAt(0) - 48;
+  if (first >= 5) n += 1n;              // HALF_UP on the first dropped digit
+  return sign * Number(n);
+}
+const cents = (dollars) => roundCents(dollars * 100);
+
+/* ---- dates: {y,m,d}, UTC-epoch arithmetic (DST-proof) ---- */
+const epochDay = (t) => Date.UTC(t.y, t.m - 1, t.d) / 86400000;
+function fromEpochDay(n) {
+  const d = new Date(n * 86400000);
+  return { y: d.getUTCFullYear(), m: d.getUTCMonth() + 1, d: d.getUTCDate() };
+}
+const addDays = (t, n) => fromEpochDay(epochDay(t) + n);
+const monthLastDay = (y, m) => new Date(Date.UTC(y, m, 0)).getUTCDate();
+function addMonths(t, n) {
+  const tm = t.m - 1 + n;
+  const y = t.y + Math.floor(tm / 12);
+  const m = (tm % 12) + 1;
+  return { y, m, d: Math.min(t.d, monthLastDay(y, m)) };
+}
+const sameDate = (a, b) => a.y === b.y && a.m === b.m && a.d === b.d;
+const isoDate = (t) =>
+  `${t.y}-${String(t.m).padStart(2, "0")}-${String(t.d).padStart(2, "0")}`;
+const parseISO = (s) => {
+  const [y, m, d] = s.split("-").map(Number);
+  return { y, m, d };
+};
+
+/* ---- payment maths ---- */
+function monthlyPaymentCents(principalC, annualRate, termMonths) {
+  if (termMonths <= 0) throw new Error("term_months must be > 0");
+  if (annualRate === 0) return roundCents(principalC / termMonths);
+  const i = annualRate / 12.0;
+  const factor = Math.pow(1 + i, termMonths);
+  return roundCents((principalC * i * factor) / (factor - 1));
+}
+
+function periodicPaymentCents(principalC, annualRate, termMonths, frequency,
+                              trueFortnightly) {
+  const monthly = monthlyPaymentCents(principalC, annualRate, termMonths);
+  if (frequency === "Monthly") return monthly;
+  if (!trueFortnightly) {
+    return frequency === "Fortnightly"
+      ? roundCents(monthly / 2)
+      : roundCents(monthly / 4);
+  }
+  const perYear = frequency === "Fortnightly" ? 26 : 52;
+  const n = Math.round((termMonths / 12) * perYear);
+  if (annualRate === 0) return roundCents(principalC / n);
+  const i = annualRate / perYear;
+  const factor = Math.pow(1 + i, n);
+  return roundCents((principalC * i * factor) / (factor - 1));
+}
+
+/* ---- the simulation (mirrors simulate() exactly) ---- */
+function simulate(opts) {
+  const {
+    balance, annual_rate, term_years,
+    frequency = "Monthly", offset = 0, extra_per_period = 0,
+    lump_sums = [], true_fortnightly = false, rate_change = null,
+  } = opts;
+  const start = opts.start ? (typeof opts.start === "string" ? parseISO(opts.start) : opts.start)
+                           : { y: 2026, m: 8, d: 1 };
+  const lumps = [...lump_sums]
+    .map((l) => [typeof l[0] === "string" ? parseISO(l[0]) : l[0], l[1]])
+    .sort((a, b) => epochDay(a[0]) - epochDay(b[0]));
+  const rc = rate_change
+    ? [typeof rate_change[0] === "string" ? parseISO(rate_change[0]) : rate_change[0], rate_change[1]]
+    : null;
+
+  let bal = cents(balance);
+  const off = cents(offset);
+  const origBal = bal;
+  const termMonths = Math.round(term_years * 12);
+  let rate = annual_rate;
+
+  let pay = periodicPaymentCents(bal, rate, termMonths, frequency, true_fortnightly);
+  const extra = cents(extra_per_period);
+
+  const step = frequency === "Weekly" ? 7 : frequency === "Fortnightly" ? 14 : null;
+  let nextPay = step ? start : addMonths(start, 1);
+
+  let day = start;
+  let accrued = 0, totalInterest = 0, totalPaid = 0;
+  const schedule = [];
+  let chargeDate = addMonths(start, 1);
+  let monthPrincipal = 0, monthInterest = 0;
+  let lumpI = 0, guardHit = null, monthsElapsed = 0;
+
+  while (bal > 0 && monthsElapsed <= MAX_MONTHS) {
+    if (rc && sameDate(day, rc[0])) {
+      rate = rc[1];
+      const remaining = termMonths - monthsElapsed;
+      if (remaining > 0)
+        pay = periodicPaymentCents(bal, rate, remaining, frequency, true_fortnightly);
+    }
+
+    while (lumpI < lumps.length && sameDate(lumps[lumpI][0], day)) {
+      const amt = cents(lumps[lumpI][1]);
+      const applied = Math.min(amt, bal);
+      bal -= applied; totalPaid += applied; monthPrincipal += applied;
+      lumpI += 1;
+      if (bal <= 0) break;
+    }
+    if (bal <= 0) break;
+
+    const effective = Math.max(0, bal - off);
+    accrued += roundCents(effective * (rate / DAYS_BASIS));
+
+    const due = step ? sameDate(day, nextPay) : sameDate(day, chargeDate);
+    if (due) {
+      let amount = pay + extra;
+      if (!step) amount = Math.min(amount, bal + accrued);
+      const payApplied = Math.min(amount, bal);
+      bal -= payApplied; totalPaid += payApplied; monthPrincipal += payApplied;
+      if (step) nextPay = addDays(day, step);
+      if (bal <= 0) {
+        if (accrued > 0) {
+          totalInterest += accrued; totalPaid += accrued; monthInterest += accrued;
+          accrued = 0;
+        }
+        break;
+      }
+    }
+
+    if (sameDate(day, chargeDate)) {
+      const charged = accrued;
+      accrued = 0;
+      totalInterest += charged; monthInterest += charged;
+      bal += charged;
+      if (guardHit === null && pay + extra < charged) guardHit = isoDate(chargeDate);
+      schedule.push({
+        date: isoDate(chargeDate), interest_c: monthInterest,
+        principal_c: monthPrincipal, balance_c: bal,
+      });
+      monthInterest = 0; monthPrincipal = 0;
+      monthsElapsed += 1;
+      chargeDate = addMonths(chargeDate, 1);
+    }
+
+    day = addDays(day, 1);
+  }
+
+  const payoff = day;
+  const monthsTaken = (payoff.y - start.y) * 12 + (payoff.m - start.m);
+  return {
+    payment_c: pay,
+    total_interest_c: totalInterest,
+    total_paid_c: totalPaid,
+    payoff_date: isoDate(payoff),
+    months_taken: monthsTaken,
+    final_balance_c: Math.max(0, bal),
+    orig_balance_c: origBal,
+    schedule,
+    schedule_months: schedule.length,
+    schedule_head: schedule.slice(0, 3),
+    schedule_tail: schedule.slice(-2),
+    neg_am_guard: guardHit,
+  };
+}
+
+function compareFrequency(balance, annualRate, termYears, offset, start,
+                          trueFortnightly) {
+  const m = simulate({ balance, annual_rate: annualRate, term_years: termYears,
+                       frequency: "Monthly", offset, start });
+  const f = simulate({ balance, annual_rate: annualRate, term_years: termYears,
+                       frequency: "Fortnightly", offset, start,
+                       true_fortnightly: trueFortnightly });
+  return {
+    monthly: m, fortnightly: f,
+    interest_saved_c: m.total_interest_c - f.total_interest_c,
+    months_saved: m.months_taken - f.months_taken,
+  };
+}
+/* ENGINE-END */
+
+const APP_VERSION="1.0.0", METHOD_VERIFIED="2026-08-07";
+const $=q=>document.querySelector(q), $$=q=>[...document.querySelectorAll(q)];
+const fmt=c=>(c<0?"-":"")+"$"+(Math.abs(c)/100).toLocaleString("en-AU",{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmt0=c=>(c<0?"-":"")+"$"+Math.round(Math.abs(c)/100).toLocaleString("en-AU");
+const MONTHS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const auDate=iso=>{const [y,m,d]=iso.split("-");return `${+d} ${MONTHS[+m-1]} ${y}`;};
+const yrsMths=n=>`${Math.floor(n/12)} yr ${n%12} mth`;
+
+function inputs(){
+  const t=$("#start").value.split("-");
+  return {
+    balance:+$("#balance").value||0,
+    annual_rate:(+$("#rate").value||0)/100,
+    term_years:+$("#term").value||0,
+    frequency:$("#freq").value,
+    offset:+$("#offset").value||0,
+    extra_per_period:+$("#extra").value||0,
+    lump_sums:(!IS_DEMO && $("#lumpAmt").value>0 && $("#lumpDate").value)
+      ? [[$("#lumpDate").value, +$("#lumpAmt").value]] : [],
+    true_fortnightly: !IS_DEMO && $("#advfn") && $("#advfn").checked,
+    rate_change:(!IS_DEMO && $("#rcRate").value && $("#rcDate").value)
+      ? [$("#rcDate").value, (+$("#rcRate").value)/100] : null,
+    start:$("#start").value,
+  };
+}
+
+/* PAYWALL: under IS_DEMO the payoff is never computed at all. */
+function computePayoff(inp){
+  if(IS_DEMO) return null;
+  const base=simulate({...inp, offset:0, extra_per_period:0, lump_sums:[], rate_change:null,
+                       frequency:"Monthly", true_fortnightly:false});
+  const actual=simulate(inp);
+  return {base, actual,
+    interest_saved_c: base.total_interest_c-actual.total_interest_c,
+    months_saved: base.months_taken-actual.months_taken};
+}
+
+let lastRun=null;
+function run(){
+  const inp=inputs();
+  if(inp.balance<=0||inp.term_years<=0){ flash("Enter a loan amount and term",true); return; }
+  const r=simulate(inp);
+  lastRun={inp,r};
+  $("#s-payment").textContent=fmt(r.payment_c);
+  $("#s-payment-lbl").textContent=`Repayment per ${inp.frequency.toLowerCase().replace("ly","")}${inp.frequency==="Monthly"?"h":""}`;
+  $("#s-interest").textContent=fmt0(r.total_interest_c);
+  $("#s-term").textContent=yrsMths(r.months_taken);
+  $("#s-payoff").textContent=auDate(r.payoff_date);
+  // schedule (first 12 + last 12 rows so the table stays light)
+  const rows=r.schedule, keep = rows.length>24 ? [...rows.slice(0,12), null, ...rows.slice(-12)] : rows;
+  const tb=$("#sched"); tb.replaceChildren();
+  for(const row of keep){
+    const tr=document.createElement("tr");
+    if(row===null){ const td=document.createElement("td"); td.colSpan=4;
+      td.textContent="… "+(rows.length-24)+" more months …"; td.style.textAlign="center";
+      td.style.color="#5c7a94"; tr.append(td); tb.append(tr); continue; }
+    for(const v of [auDate(row.date), fmt(row.interest_c), fmt(row.principal_c), fmt(row.balance_c)]){
+      const td=document.createElement("td"); td.textContent=v; tr.append(td);
+    }
+    tb.append(tr);
+  }
+  drawChart(rows);
+  const payoff=computePayoff(inp);
+  if(payoff){
+    $("#p-interest").textContent=fmt0(payoff.interest_saved_c);
+    $("#p-time").textContent=payoff.months_saved>0?yrsMths(payoff.months_saved):"0 mth";
+    $("#p-note").textContent=`vs a plain monthly loan with no offset or extra repayments (${fmt0(payoff.base.total_interest_c)} interest, ${yrsMths(payoff.base.months_taken)}).`;
+  }
+  if($("#negam")) $("#negam").style.display = r.neg_am_guard ? "block" : "none";
+}
+
+function drawChart(rows){
+  const c=$("#chart"), ctx=c.getContext("2d");
+  const W=c.width=c.clientWidth*2, H=c.height=380;
+  ctx.clearRect(0,0,W,H);
+  if(!rows.length) return;
+  const step=Math.max(1,Math.ceil(rows.length/240));       // downsample
+  const pts=rows.filter((_,i)=>i%step===0);
+  const max=Math.max(...pts.map(p=>p.balance_c),1);
+  ctx.lineWidth=4; ctx.strokeStyle="#14395b"; ctx.beginPath();
+  pts.forEach((p,i)=>{const x=i/(pts.length-1||1)*(W-40)+20, y=H-20-(p.balance_c/max)*(H-40);
+    i?ctx.lineTo(x,y):ctx.moveTo(x,y);});
+  ctx.stroke();
+  ctx.fillStyle="#5c7a94"; ctx.font="22px Segoe UI";
+  ctx.fillText("Loan balance over time", 22, 30);
+}
+
+function flash(msg,bad){const f=$("#flash");f.textContent=msg;f.className="flash show"+(bad?" bad":"");
+  setTimeout(()=>f.classList.remove("show"),3000);}
+
+/* method panel: auto-open on FIRST load (§15 hard rule) */
+function methodPanel(show){ $("#method").style.display = show?"block":"none"; }
+function bootMethod(){
+  let seen=false;
+  try{ seen = localStorage.getItem("amc_method_seen")==="1"; }catch(e){}
+  methodPanel(!seen);
+  try{ localStorage.setItem("amc_method_seen","1"); }catch(e){}
+}
+
+/* save / load / export — PAID ONLY */
+function save(){
+  if(IS_DEMO) return;
+  const blob=new Blob([JSON.stringify({schema:1,app:APP_VERSION,inputs:inputs()},null,1)],{type:"application/json"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+  a.download="mortgage-scenario.json"; document.body.append(a); a.click(); a.remove();
+  flash("Scenario saved");
+}
+function loadFile(file){
+  const rd=new FileReader();
+  rd.onload=()=>{ try{
+      const j=JSON.parse(rd.result); const i=j.inputs||{};
+      const num=(v,d)=>Number.isFinite(+v)?+v:d;
+      $("#balance").value=num(i.balance,0); $("#rate").value=num(i.annual_rate,0)*100;
+      $("#term").value=num(i.term_years,0); $("#offset").value=num(i.offset,0);
+      $("#extra").value=num(i.extra_per_period,0);
+      if(["Weekly","Fortnightly","Monthly"].includes(i.frequency)) $("#freq").value=i.frequency;
+      if(typeof i.start==="string" && /^\d{4}-\d{2}-\d{2}$/.test(i.start)) $("#start").value=i.start;
+      run(); flash("Scenario loaded");
+    }catch(e){ flash("Couldn't read that file",true); } };
+  rd.readAsText(file);
+}
+function exportCsv(){
+  if(IS_DEMO||!lastRun) return;
+  const lines=["Date,Interest,Principal,Balance"];
+  for(const r of lastRun.r.schedule)
+    lines.push(`${r.date},${(r.interest_c/100).toFixed(2)},${(r.principal_c/100).toFixed(2)},${(r.balance_c/100).toFixed(2)}`);
+  const blob=new Blob([lines.join("\n")],{type:"text/csv"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+  a.download="amortisation-schedule.csv"; document.body.append(a); a.click(); a.remove();
+  flash("Schedule exported");
+}
+
+/* scenario compare — PAID ONLY */
+const saved=[];
+function snapshot(){
+  if(IS_DEMO||!lastRun) return;
+  const {inp,r}=lastRun;
+  saved.push({name:`${fmt0(inp.balance*100)} @ ${(inp.annual_rate*100).toFixed(2)}% ${inp.frequency}${inp.offset?" +offset":""}`,
+    interest:r.total_interest_c, months:r.months_taken, payment:r.payment_c});
+  const tb=$("#compare"); tb.replaceChildren();
+  saved.forEach(s=>{ const tr=document.createElement("tr");
+    [s.name, fmt(s.payment), fmt0(s.interest), yrsMths(s.months)].forEach(v=>{
+      const td=document.createElement("td"); td.textContent=v; tr.append(td); });
+    tb.append(tr); });
+  $("#compareWrap").style.display="block";
+  flash("Scenario added to compare");
+}
+
+document.addEventListener("DOMContentLoaded",()=>{
+  $$("input,select").forEach(el=>el.addEventListener("change",run));
+  $("#runbtn").addEventListener("click",run);
+  $("#methodbtn").addEventListener("click",()=>methodPanel(true));
+  $("#methodclose").addEventListener("click",()=>methodPanel(false));
+  if(!IS_DEMO){
+    $("#savebtn").addEventListener("click",save);
+    $("#loadbtn").addEventListener("click",()=>$("#loadfile").click());
+    $("#loadfile").addEventListener("change",e=>{if(e.target.files[0])loadFile(e.target.files[0]);e.target.value="";});
+    $("#csvbtn").addEventListener("click",exportCsv);
+    $("#cmpbtn").addEventListener("click",snapshot);
+  }
+  bootMethod(); run();
+});
+
+</script>
+</body>
+</html>
