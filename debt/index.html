@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Debt Payoff App — FREE DEMO</title>
+<style>
+:root{--navy:#14395b;--navy2:#0e2a44;--gold:#f2b138;--light:#eef2f7;--bad:#c62839;--good:#2e7d32;}
+*{box-sizing:border-box;margin:0}
+body{font-family:"Segoe UI",system-ui,sans-serif;background:var(--light);color:#17324e}
+header{background:var(--navy);color:#fff;padding:14px 18px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+header .logo{display:flex;gap:4px;align-items:flex-end;height:26px;margin-right:6px}
+header .logo i{width:7px;background:var(--gold);border-radius:2px;display:inline-block}
+h1{font-size:1.15rem;margin-right:auto}
+.vbanner{font-size:.72rem;color:#bccfe0;width:100%}
+nav{display:flex;gap:4px;background:var(--navy2);padding:6px 12px;flex-wrap:wrap}
+.tabbtn{background:transparent;border:0;color:#cfe0ee;padding:8px 14px;border-radius:8px 8px 0 0;cursor:pointer;font-size:.95rem}
+.tabbtn.on{background:var(--light);color:var(--navy);font-weight:600}
+main{max-width:1060px;margin:0 auto;padding:16px}
+.tab{display:none}.tab.show{display:block}
+.card{background:#fff;border-radius:12px;padding:16px;margin-bottom:14px;box-shadow:0 1px 4px rgba(20,57,91,.12)}
+.card h2{font-size:1.02rem;margin-bottom:10px;color:var(--navy)}
+.card h3{font-size:.95rem;margin:14px 0 8px;color:var(--navy)}
+table{border-collapse:collapse;width:100%}
+td,th{padding:6px 8px;border-bottom:1px solid #e4ebf2;font-size:.92rem;text-align:left}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+tr.done td{color:var(--good)}
+.bad{color:var(--bad)}.good{color:var(--good)}
+.muted{color:#5c7a94;font-size:.92rem}
+input,select,button{font:inherit;padding:6px 8px;border:1px solid #c4d2df;border-radius:8px;background:#fff}
+input.money{width:110px;text-align:right}
+input.rate{width:80px}
+button.primary{background:var(--gold);border:0;font-weight:700;cursor:pointer}
+button.mini{border:0;background:transparent;color:#a44;cursor:pointer}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:12px}
+.stat{background:#f7fafc;border:1px solid #e4ebf2;border-radius:12px;padding:14px}
+.stat .lbl{font-size:.8rem;color:#5c7a94}
+.stat .big{font-size:1.5rem;font-weight:700;color:var(--navy)}
+.rowbtns{margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tscroll table{min-width:520px}
+.note{background:#f2f8f2;border:1px solid #cfe5cf;border-radius:10px;padding:9px 12px;margin:8px 0;font-size:.92rem}
+.note.good{color:var(--good)}
+.warnbox{display:none;border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:.92rem;background:#fff6e3;border:1px solid var(--gold)}
+.warnbox.show{display:block}
+.warnbox.bad{background:#fdecee;border-color:var(--bad)}
+.flash{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:10px 18px;border-radius:10px;opacity:0;pointer-events:none;transition:.3s;max-width:90vw}
+.flash.show{opacity:1}.flash.bad{background:var(--bad)}
+#savebanner{display:none;background:#fff6e3;border:1px solid var(--gold);padding:8px 12px;border-radius:10px;margin-bottom:12px;font-size:.9rem}
+#savebanner.show{display:block}
+#storagewarn{display:none;background:#fdecee;border:1px solid var(--bad);padding:8px 12px;border-radius:10px;margin-bottom:12px;font-size:.9rem}
+#storagewarn.show{display:block}
+#curve{width:100%;height:260px;display:block}
+footer{max-width:1060px;margin:8px auto 40px;padding:0 16px;font-size:.72rem;color:#5c7a94}
+.wm{position:fixed;inset:0;pointer-events:none;z-index:50;display:flex;align-items:center;justify-content:center}
+.wm span{transform:rotate(-28deg);font-size:3.2rem;font-weight:800;color:rgba(20,57,91,.10);white-space:nowrap}
+.demobar{background:var(--gold);color:var(--navy);text-align:center;padding:8px;font-weight:700}
+.demobar a{color:var(--navy)}
+.about p{margin-bottom:9px;font-size:.92rem}
+@media(max-width:640px){ td,th{font-size:.82rem;padding:5px 4px} input.money{width:88px} input.rate{width:64px} h1{font-size:1rem} }
+</style>
+</head>
+<body>
+<div class="demobar">FREE DEMO — capped &amp; watermarked, no saving. Get the full app on Etsy: <a href="https://www.etsy.com/au/shop/BudgetHubAU?utm_source=demo&utm_medium=app&utm_campaign=debtapp" target="_blank" rel="noopener">BudgetHubAU</a></div>
+<header>
+  <span class="logo"><i style="height:13px"></i><i style="height:19px"></i><i style="height:26px"></i></span>
+  <h1>The Debt Payoff App — FREE DEMO</h1>
+  <button id="savebtn" class="primary">Save to file</button>
+  <button id="loadbtn">Load file</button>
+  <input type="file" id="loadfile" accept="application/json,.json" style="display:none">
+  <span class="vbanner">v1.0.0 &middot; machine-checked to the cent against an independent model &middot; your numbers never leave this device &middot; not financial advice</span>
+</header>
+<nav>
+  <button class="tabbtn on" data-t="debts">Your debts</button>
+  <button class="tabbtn" data-t="plan">The plan</button>
+  <button class="tabbtn" data-t="about">About the numbers</button>
+</nav>
+<main>
+  <div id="savebanner">Unsaved changes &mdash; use <b>Save to file</b> before you close (files are the real save; browser storage is only a cache).</div>
+  <div id="storagewarn">This browser blocks local storage here (common for files opened directly) &mdash; no problem: use <b>Save to file</b> / <b>Load file</b>, that&rsquo;s the designed way.</div>
+
+  <section class="tab show" id="tab-debts"><div class="card">
+    <h2>List every debt &mdash; up to 8</h2>
+    <div class="tscroll"><table><thead><tr><th>Debt</th><th>Balance owing $</th><th>Yearly rate %</th><th>Minimum / month $</th><th></th></tr></thead>
+    <tbody id="debt-rows"></tbody></table></div>
+    <div class="rowbtns">
+      <button id="adddebt">+ Add a debt</button>
+      <span class="muted">Zero-rate debts (interest-free plans) are fine &mdash; type 0.</span>
+    </div>
+  </div></section>
+
+  <section class="tab" id="tab-plan">
+    <div class="card">
+    <h2>The plan settings</h2>
+    <p style="font-size:.92rem;margin-bottom:8px">Extra you can pay per month, on top of the minimums: $ <input id="extra" class="money" inputmode="decimal"></p>
+    <p style="font-size:.92rem">Method:
+      <label><input type="radio" name="mode" value="snowball" checked> <b>Snowball</b> &mdash; smallest balance first (quick wins)</label> &nbsp;
+      <label><input type="radio" name="mode" value="avalanche"> <b>Avalanche</b> &mdash; highest rate first (least interest)</label></p>
+    <p class="muted" style="margin-top:8px">Every debt always gets its own minimum. When a debt is cleared, its minimum rolls onto the next target automatically &mdash; that&rsquo;s the snowball.</p>
+    </div>
+    <div id="planwarn" class="warnbox"></div>
+    <div class="card"><h2>The answer</h2><div id="planbox"></div><div id="comparebox"></div></div>
+    <div class="card"><h2>The payoff curve &mdash; total owing, month by month</h2><canvas id="curve"></canvas></div>
+  </section>
+
+  <section class="tab" id="tab-about"><div class="card about">
+    <h2>About the numbers &mdash; the exact rules this app computes with</h2>
+    <p><b>Interest:</b> each month, every debt with a balance is charged its yearly rate &divide; 12 on the current balance, rounded half-up at the cent, before any payment is applied. Fees, rate changes and daily-interest quirks of your actual lender are not modelled &mdash; this is a planning tool, not your lender&rsquo;s statement.</p>
+    <p><b>Payments:</b> every debt pays its own minimum every month (never more than what&rsquo;s owed). The target debt also gets your extra amount plus the minimums freed up by every debt already cleared.</p>
+    <p><b>The order:</b> snowball targets the smallest <i>starting</i> balance first; avalanche targets the highest rate first. Ties go to the earlier row in your list.</p>
+    <p><b>Honesty cap:</b> if a plan doesn&rsquo;t clear inside 240 months (20 years), the app says <i>not on these numbers</i> instead of inventing a date. If a minimum doesn&rsquo;t cover a debt&rsquo;s monthly interest, the app names that debt out loud &mdash; its balance grows until the plan reaches it.</p>
+    <p><b>The maths is machine-checked:</b> this exact calculation engine is verified cent-for-cent against an independently written model across 424 test scenarios before the file ships.</p>
+    <p><b>Your data:</b> this file makes zero internet connections. Save writes a small JSON file to your device; Load reads it back. Browser storage is only a convenience cache.</p>
+  </div></section>
+</main>
+<div id="flash" class="flash"></div>
+<div class="wm"><span>DEMO — buy the full version</span></div>
+<footer>Designed by Blake Morkham-Calvert, made with AI assistance. General information only &mdash; not financial advice. The payoff plan uses the interest convention printed inside the app and ignores fees, rate changes and your personal circumstances.<br><br><strong>Free updates + new tools</strong> &mdash; optional, one email, unsubscribe anytime: <a href="https://forms.gle/2wJGmp9zuFpXECFd6" target="_blank" rel="noopener noreferrer">sign up here</a>. (A plain link only &mdash; this file still makes no network calls on its own.)</footer>
+<script>
+"use strict";
+const IS_DEMO = true;
+const DEMO_SEED = {
+  debts:[{name:"Credit card", balance_c:420000, rate_cp:2099, min_c:12600},
+         {name:"Car loan", balance_c:980000, rate_cp:850, min_c:26000},
+         {name:"Buy-now-pay-later", balance_c:90000, rate_cp:0, min_c:6000}],
+  extra_c:15000, mode:"snowball"
+};
+/* The Debt Payoff App - engine. EXACT integer-arithmetic port of the
+ * audited Python truth model (truth_snowball.simulate, Decimal
+ * ROUND_HALF_UP). No floats ever touch money:
+ *   balances / minimums / extra : integer CENTS
+ *   rates                       : integer CENTI-PERCENT (20.99% -> 2099)
+ *   interest = ROUND_HALF_UP(bal_c * rate_cp / 120000) in cents.
+ * All balance/interest arithmetic inside simulate() runs in BigInt, so
+ * the maths itself is exact for ALL inputs the UI admits - even
+ * pathological grower plans whose balances compound past 2^53 before the
+ * 240-month cap (an adversarial-review fix, 2 Sep 2026: plain Number
+ * provably diverged there). Results are cast to Number at the boundary,
+ * which is cent-exact up to Number.MAX_SAFE_INTEGER (~$90 trillion in
+ * cents). That bound covers EVERY finite plan and every realistic input;
+ * the only thing past it is the running total of a never-clears plan
+ * with absurd inputs (e.g. $999,999.99 at 99.9% with a $0 minimum),
+ * whose displayed figure may be off by a cent at the 17th digit and is
+ * always shown under the "Not inside 20 years" banner, never as a real
+ * payoff. The parity gate proves cent-exactness across the whole
+ * realistic domain.
+ * Conventions (stated in the app's About panel, verbatim from the truth):
+ *   interest first each month; every debt pays its own minimum (capped);
+ *   the target debt also gets extra + freed minimums of cleared debts;
+ *   snowball targets smallest STARTING balance, avalanche highest rate,
+ *   ties to the earlier row; cap 240 months - beyond that the app says
+ *   NOT ON THESE NUMBERS instead of inventing a date.
+ * Parity gate: src/parity_debt.mjs vs build/truth_debt.json must be 100%
+ * cent-exact (negative control caught) before any release. */
+(function (root, factory) {
+  if (typeof module === "object" && module.exports) module.exports = factory();
+  else root.DebtEngine = factory();
+}(typeof self !== "undefined" ? self : this, function () {
+  "use strict";
+
+  // ROUND_HALF_UP(n / d) for non-negative integers n, d>0 (Number path,
+  // kept for callers with small operands and for the parity of the API)
+  function divHalfUp(n, d) {
+    var q = Math.floor(n / d);
+    var rem = n - q * d;
+    return (2 * rem >= d) ? q + 1 : q;
+  }
+  // BigInt ROUND_HALF_UP(n / d), n >= 0n, d > 0n
+  function divHalfUpBig(n, d) {
+    var q = n / d;
+    var rem = n - q * d;
+    return (2n * rem >= d) ? q + 1n : q;
+  }
+
+  /* debts: [{balance_c, rate_cp, min_c}], extra_c: int, mode: 'snowball'|
+   * 'avalanche'. Returns the full plan incl. the month-by-month total
+   * curve (curve_c[0] = starting total, curve_c[m] = total owing after
+   * month m) for the chart. All money maths in BigInt (see header). */
+  function simulate(debts, extra_c, mode, monthsCap) {
+    if (mode !== "snowball" && mode !== "avalanche") {
+      throw new Error("mode must be snowball or avalanche");
+    }
+    monthsCap = monthsCap || 240;
+    var n = debts.length;
+    var bals = debts.map(function (d) { return BigInt(d.balance_c); });
+    var start = bals.slice();
+    var rates = debts.map(function (d) { return BigInt(d.rate_cp); });
+    var mins = debts.map(function (d) { return BigInt(d.min_c); });
+    var extra = BigInt(extra_c);
+    var startN = debts.map(function (d) { return d.balance_c; });
+    var ratesN = debts.map(function (d) { return d.rate_cp; });
+    var idx = [];
+    for (var i = 0; i < n; i++) idx.push(i);
+    var order = idx.slice().sort(mode === "avalanche"
+      ? function (a, b) { return (ratesN[b] - ratesN[a]) || (a - b); }
+      : function (a, b) { return (startN[a] - startN[b]) || (a - b); });
+    var totalInterest = 0n;
+    var payoffMonth = idx.map(function () { return null; });
+    var growers = {};              // §5B.19: any month a balance exceeds start
+    function total() {
+      var s = 0n;
+      for (var j = 0; j < n; j++) s += bals[j];
+      return s;
+    }
+    var curve = [Number(total())];
+    var month = 0;
+    function anyOwing() {
+      for (var j = 0; j < n; j++) if (bals[j] > 0n) return true;
+      return false;
+    }
+    while (anyOwing() && month < monthsCap) {
+      month += 1;
+      for (var a = 0; a < n; a++) {
+        if (bals[a] > 0n) {
+          var interest = divHalfUpBig(bals[a] * rates[a], 120000n);
+          bals[a] += interest;
+          totalInterest += interest;
+        }
+      }
+      var target = null;
+      for (var o = 0; o < order.length; o++) {
+        if (bals[order[o]] > 0n) { target = order[o]; break; }
+      }
+      var freed = 0n;
+      for (var f = 0; f < n; f++) if (bals[f] === 0n) freed += mins[f];
+      for (var p = 0; p < n; p++) {
+        if (bals[p] <= 0n) continue;
+        var pay = mins[p] + (p === target ? (extra + freed) : 0n);
+        if (pay > bals[p]) pay = bals[p];
+        bals[p] -= pay;
+        if (bals[p] === 0n && payoffMonth[p] === null) payoffMonth[p] = month;
+        if (bals[p] > start[p]) growers[p] = true;
+      }
+      curve.push(Number(total()));
+    }
+    var allClear = !anyOwing();
+    var unfinished = [];
+    for (var u = 0; u < n; u++) if (bals[u] > 0n) unfinished.push(u);
+    return {
+      months: allClear ? month : null,
+      total_interest_c: Number(totalInterest),
+      payoff_month: payoffMonth,
+      order: order,
+      unfinished: unfinished,
+      end_balances_c: bals.map(Number),
+      growers: Object.keys(growers).map(Number),
+      curve_c: curve,
+    };
+  }
+
+  // ---- input parsing/guards: strings -> cents/centipercent or a named error
+  function parseMoney(s, what, allowBlank) {
+    var t = String(s == null ? "" : s).trim().replace(/[$,\s]/g, "");
+    if (t === "") {
+      if (allowBlank) return { ok: true, cents: 0, blank: true };
+      return { ok: false, msg: what + " is empty - type a dollar amount" };
+    }
+    if (!/^\d+(\.\d{1,2})?$/.test(t)) {
+      return { ok: false, msg: what + " doesn't look like money - use numbers like 250 or 250.75" };
+    }
+    var parts = t.split(".");
+    var cents = parseInt(parts[0], 10) * 100 +
+      (parts[1] ? parseInt((parts[1] + "0").slice(0, 2), 10) : 0);
+    if (cents > 99999999) {
+      return { ok: false, msg: what + " is over the $999,999.99 ceiling" };
+    }
+    return { ok: true, cents: cents, blank: false };
+  }
+  function parseRate(s, what) {
+    var t = String(s == null ? "" : s).trim().replace(/[%\s]/g, "");
+    if (t === "") return { ok: false, msg: what + " is empty - type the yearly rate, like 19.9 (0 is fine)" };
+    if (!/^\d+(\.\d{1,2})?$/.test(t)) {
+      return { ok: false, msg: what + " doesn't look like a rate - numbers only, like 19.9" };
+    }
+    var parts = t.split(".");
+    var cp = parseInt(parts[0], 10) * 100 +
+      (parts[1] ? parseInt((parts[1] + "0").slice(0, 2), 10) : 0);
+    if (cp > 9990) return { ok: false, msg: what + " is over 99.9% - check the number" };
+    return { ok: true, cp: cp };
+  }
+  function fmtMoney(cents) {
+    var neg = cents < 0; if (neg) cents = -cents;
+    var d = Math.floor(cents / 100), c = cents % 100;
+    var s = String(d).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return (neg ? "-$" : "$") + s + "." + (c < 10 ? "0" : "") + c;
+  }
+
+  return { simulate: simulate, divHalfUp: divHalfUp, parseMoney: parseMoney,
+           parseRate: parseRate, fmtMoney: fmtMoney, VERSION: "1.0.0" };
+}));
+
+
+// ---------- app state (all money = integer cents; rates = centi-percent) ----
+const SCHEMA_VERSION = 1;
+const APP_VERSION = "1.0.0";
+const MAX_DEBTS = 8;
+const E = window.DebtEngine;
+let state = null;
+let dirty = false;
+
+function defaultState(){
+  return { schema_version: SCHEMA_VERSION,
+    debts: [ {name:"", balance_c:0, rate_cp:0, min_c:0} ],
+    extra_c: 0, mode: "snowball", meta: {} };
+}
+
+// ---------- helpers ----------
+const $  = (q)=>document.querySelector(q);
+const $$ = (q)=>[...document.querySelectorAll(q)];
+function el(tag, attrs, ...kids){
+  const e=document.createElement(tag);
+  for(const [k,v] of Object.entries(attrs||{})){
+    if(k==="class") e.className=v;
+    else if(k.startsWith("on")) e.addEventListener(k.slice(2), v);
+    else e.setAttribute(k, v);
+  }
+  for(const k of kids){ e.append(k); } // strings become text nodes: XSS-safe
+  return e;
+}
+const fmt = E.fmtMoney;
+function yrs(months){
+  if(months==null) return "—";
+  const y=Math.floor(months/12), m=months%12;
+  if(y===0) return m+" month"+(m===1?"":"s");
+  return y+"y "+m+"m";
+}
+const cap = (s)=> s.charAt(0).toUpperCase()+s.slice(1);
+/* Two-tier rendering (adversarial-review fix, 2 Sep 2026): a VALUE edit
+ * must never rebuild the debts table - rebuilding stole keyboard focus
+ * after every field and broke Tab-through entry. Only STRUCTURAL changes
+ * (add/delete/load) rebuild rows. */
+function markDirty(structural){
+  dirty=true;
+  if(!IS_DEMO) $("#savebanner").classList.add("show");
+  cacheState();
+  if(structural) renderDebts();
+  renderOutputs();
+}
+
+// ---------- storage self-check + cache (localStorage = CACHE ONLY) ----------
+let storageOK = false;
+try { localStorage.setItem("__adp_test","1"); storageOK = localStorage.getItem("__adp_test")==="1"; localStorage.removeItem("__adp_test"); } catch(e){ storageOK=false; }
+function cacheState(){ if(!storageOK||IS_DEMO) return; try{ localStorage.setItem("adp_state", JSON.stringify(state)); }catch(e){} }
+function loadCache(){ if(!storageOK) return null; try{ const s=localStorage.getItem("adp_state"); return s? importState(JSON.parse(s)) : null; }catch(e){ return null; } }
+
+// ---------- import validation (file-based load is PRIMARY; XSS-hardened) ----
+function str(x, max){ return (typeof x==="string"? x : "").slice(0, max||60); }
+function int(x){ const n=Number(x); return Number.isFinite(n)? Math.round(n) : 0; }
+function clampc(x){ return Math.max(0, Math.min(99999999, int(x))); }
+function importState(raw){
+  if(!raw || typeof raw!=="object" || !Array.isArray(raw.debts)) throw new Error("not a Debt Payoff App save file");
+  const capN = IS_DEMO? 3 : MAX_DEBTS;
+  const s={ schema_version: SCHEMA_VERSION,
+    debts: raw.debts.slice(0, capN).map(d=>({
+      name: str(d.name,40), balance_c: clampc(d.balance_c),
+      rate_cp: Math.max(0, Math.min(9990, int(d.rate_cp))),
+      min_c: clampc(d.min_c) })),
+    extra_c: clampc(raw.extra_c),
+    mode: (raw.mode==="avalanche"? "avalanche" : "snowball"),
+    meta:{} };
+  // never silently drop rows: the caller surfaces this (review fix 2 Sep)
+  s.dropped = Math.max(0, raw.debts.length - capN);
+  if(!s.debts.length) s.debts=defaultState().debts;
+  return s;
+}
+
+// ---------- derived numbers (engine calls - the parity-proven maths) -------
+function activeDebts(){
+  // keep each live debt's ORIGINAL row number so fallback labels match
+  // what the buyer sees on the Your debts tab (review fix, 2 Sep 2026)
+  const out=[];
+  state.debts.forEach((d,row)=>{ if(d.balance_c>0) out.push({...d, row}); });
+  return out;
+}
+function derive(){
+  const live = activeDebts();
+  if(!live.length) return { live, plan:null };
+  const other = state.mode==="snowball"? "avalanche" : "snowball";
+  const plan = E.simulate(live, state.extra_c, state.mode);
+  // a single debt pays off identically either way - no comparison to show
+  const alt  = live.length>1? E.simulate(live, state.extra_c, other) : null;
+  const base = state.extra_c>0? E.simulate(live, 0, state.mode) : null;
+  return { live, plan, alt, base, other };
+}
+
+// ---------- inputs with NAMED guards (engine parse, flash on bad) ----------
+function moneyField(cents, what, onset){
+  const inp=el("input",{type:"text", inputmode:"decimal", class:"money",
+    value: cents? (cents/100).toFixed(2):""});
+  inp.addEventListener("change",()=>{
+    const r=E.parseMoney(inp.value, what, true);
+    if(!r.ok){ flash(r.msg, true); inp.value = cents? (cents/100).toFixed(2):""; return; }
+    inp.value = r.blank? "" : (r.cents/100).toFixed(2);
+    onset(r.cents);
+  });
+  return inp;
+}
+function rateField(cp, what, onset){
+  const inp=el("input",{type:"text", inputmode:"decimal", class:"money rate",
+    value: cp? (cp/100).toFixed(2):""});
+  inp.addEventListener("change",()=>{
+    if(String(inp.value).trim()===""){ inp.value=""; onset(0); return; }
+    const r=E.parseRate(inp.value, what);
+    if(!r.ok){ flash(r.msg, true); inp.value = cp? (cp/100).toFixed(2):""; return; }
+    inp.value = (r.cp/100).toFixed(2);
+    onset(r.cp);
+  });
+  return inp;
+}
+
+// ---------- rendering ----------
+function renderDebts(){
+  const bt=$("#debt-rows"); bt.replaceChildren();
+  state.debts.forEach((r,i)=>{
+    const name=el("input",{type:"text", value:r.name, maxlength:"40", placeholder:"e.g. Credit card"});
+    name.addEventListener("change",()=>{r.name=name.value.slice(0,40); markDirty();});
+    bt.append(el("tr",{},
+      el("td",{}, name),
+      el("td",{}, moneyField(r.balance_c, "Balance", v=>{r.balance_c=v; markDirty();})),
+      el("td",{}, rateField(r.rate_cp, "Interest rate", v=>{r.rate_cp=v; markDirty();})),
+      el("td",{}, moneyField(r.min_c, "Minimum payment", v=>{r.min_c=v; markDirty();})),
+      el("td",{}, el("button",{class:"mini", title:"Delete this debt", "aria-label":"Delete "+(r.name||"debt row "+(i+1)),
+        onclick:()=>{
+          const hasData = r.name || r.balance_c || r.rate_cp || r.min_c;
+          if(hasData && !window.confirm("Delete "+(r.name||"this debt")+"? There is no undo.")) return;
+          state.debts.splice(i,1); if(!state.debts.length) state.debts=defaultState().debts; markDirty(true);}},"✕"))));
+  });
+  $("#adddebt").disabled = state.debts.length>=MAX_DEBTS;
+  $("#extra").value = state.extra_c? (state.extra_c/100).toFixed(2):"";
+  $$("input[name=mode]").forEach(rb=>{ rb.checked = (rb.value===state.mode); });
+}
+function render(){ renderDebts(); renderOutputs(); }
+
+function renderOutputs(){
+  const d=derive();
+  $$("input[name=mode]").forEach(rb=>{ rb.checked = (rb.value===state.mode); });
+  const box=$("#planbox"); box.replaceChildren();
+  const warn=$("#planwarn"); warn.replaceChildren(); warn.className="warnbox";
+  const cmp=$("#comparebox"); cmp.replaceChildren();
+  if(!d.plan){
+    box.append(el("p",{class:"muted"},"Type at least one debt with a balance on the Your debts tab and the plan appears here."));
+    drawCurve(null,null,null);
+    return;
+  }
+  const p=d.plan, live=d.live;
+  const nameOf=(j)=> live[j].name || ("Debt "+(live[j].row+1));
+  const listNames=(ids)=> ids.map(nameOf).join(", ");
+
+  // honesty first: the 240-month cap and growing debts (named out loud)
+  if(p.months===null){
+    warn.className="warnbox show bad";
+    warn.append(el("b",{},"Not on these numbers."),
+      el("span",{}," After 20 years these payments don’t clear: "+listNames(p.unfinished)+". "));
+    if(p.growers.length){
+      warn.append(el("span",{}, (p.growers.length===1?
+        "The minimum on "+listNames(p.growers)+" doesn’t even cover the monthly interest — that balance grows. ":
+        "The minimums on "+listNames(p.growers)+" don’t even cover the monthly interest — those balances grow. ")));
+    }
+    warn.append(el("span",{},"Raise the minimums or the extra amount and the plan recomputes instantly."));
+  } else if(p.growers.length){
+    warn.className="warnbox show";
+    warn.append(el("b",{},"Watch out: "),
+      el("span",{}, (p.growers.length===1?
+        listNames(p.growers)+" grows for a while before the plan reaches it — its minimum is under the monthly interest.":
+        listNames(p.growers)+" grow for a while before the plan reaches them — their minimums are under the monthly interest.")
+        +" The plan still clears everything; the chart shows the bump."));
+  }
+
+  // THE ANSWER
+  const stats=el("div",{class:"grid"});
+  stats.append(
+    el("div",{class:"stat"}, el("div",{class:"lbl"},"Debt-free in"),
+      el("div",{class:"big"+(p.months===null?" bad":"")}, p.months===null? "Not inside 20 years" : yrs(p.months))),
+    el("div",{class:"stat"}, el("div",{class:"lbl"}, p.months===null? "Interest in the first 20 years" : "Total interest on this plan"),
+      el("div",{class:"big"}, fmt(p.total_interest_c))),
+    el("div",{class:"stat"}, el("div",{class:"lbl"},"Debts cleared"),
+      el("div",{class:"big"}, (live.length - p.unfinished.length)+" of "+live.length)));
+  box.append(stats);
+
+  // what the extra buys you (vs minimums only) - computed, buyer's own numbers
+  if(d.base && p.months!==null){
+    const b=d.base;
+    if(b.months===null){
+      box.append(el("p",{class:"note good"},"Minimums alone never get there inside 20 years on these numbers — your extra "+fmt(state.extra_c)+" a month is what makes this plan finish."));
+    } else {
+      const saved=b.total_interest_c-p.total_interest_c, sooner=b.months-p.months;
+      if(sooner>0 && saved>0){
+        box.append(el("p",{class:"note good"},"Your extra "+fmt(state.extra_c)+" a month finishes the plan "+yrs(sooner)+" sooner and saves "+fmt(saved)+" in interest, compared with paying minimums only."));
+      } else if(saved>0){
+        box.append(el("p",{class:"note good"},"Your extra "+fmt(state.extra_c)+" a month saves "+fmt(saved)+" in interest compared with paying minimums only."));
+      }
+    }
+  }
+
+  // payoff order table
+  const tbl=el("table",{}, el("thead",{}, el("tr",{},
+    el("th",{},"#"), el("th",{},"Debt"), el("th",{class:"num"},"Starting balance"), el("th",{class:"num"},"Rate"), el("th",{class:"num"},"Paid off in"))));
+  const tb=el("tbody",{});
+  p.order.forEach((j,k)=>{
+    const pm=p.payoff_month[j];
+    tb.append(el("tr",{class: pm===null?"":"done"},
+      el("td",{}, String(k+1)),
+      el("td",{}, nameOf(j)),
+      el("td",{class:"num"}, fmt(live[j].balance_c)),
+      el("td",{class:"num"}, (live[j].rate_cp/100).toFixed(2)+"%"),
+      el("td",{class:"num"+(pm===null?" bad":"")}, pm===null? "not inside 20 years" : "month "+pm)));
+  });
+  tbl.append(tb);
+  box.append(el("h3",{},"The order "+(state.mode==="snowball"?"(smallest balance first)":"(highest rate first)")), tbl);
+
+  // method comparison - both computed live by the same engine. Every
+  // branch is covered, including chosen-fails-but-other-succeeds (an
+  // adversarial-review fix: silence there hid the honest answer).
+  const a=d.alt;
+  if(a){
+    if(p.months!==null && a.months!==null){
+      const diff=a.total_interest_c-p.total_interest_c;
+      if(diff>0) cmp.append(el("p",{class:"note"},"On these numbers, "+cap(state.mode)+" costs "+fmt(diff)+" LESS interest than "+cap(d.other)+"."));
+      else if(diff<0) cmp.append(el("p",{class:"note"},"Heads up: "+cap(d.other)+" would cost "+fmt(-diff)+" less interest on these numbers. Prefer the quick first win anyway? That’s what "+cap(state.mode)+" is for — the switch is one click above."));
+      else cmp.append(el("p",{class:"note"},"On these numbers both methods cost the same interest."));
+    } else if(p.months!==null && a.months===null){
+      cmp.append(el("p",{class:"note"},"On these numbers "+cap(d.other)+" doesn’t finish inside 20 years — "+cap(state.mode)+" is the one that gets there."));
+    } else if(p.months===null && a.months!==null){
+      cmp.append(el("p",{class:"note"},"Important: "+cap(d.other)+" DOES clear these debts — in "+yrs(a.months)+", with "+fmt(a.total_interest_c)+" total interest. The switch is one click above."));
+    }
+  }
+  drawCurve(p, a, d);
+}
+
+// ---------- the payoff curve (canvas, no libraries) ----------
+function drawCurve(p, a, d){
+  const cv=$("#curve"); const ctx=cv.getContext("2d");
+  const dpr=window.devicePixelRatio||1;
+  const W=cv.clientWidth, H=260;
+  cv.width=W*dpr; cv.height=H*dpr; ctx.scale(dpr,dpr);
+  ctx.clearRect(0,0,W,H);
+  if(!p){ ctx.fillStyle="#5c7a94"; ctx.font="14px Segoe UI"; ctx.fillText("The payoff curve appears here.", 16, 40); return; }
+  const L=64,R=12,T=14,B=30;
+  const months=Math.max(p.curve_c.length, a? a.curve_c.length:0)-1;
+  const peak=Math.max(...p.curve_c, ...(a? a.curve_c:[0]));
+  const x=(m)=> L+(W-L-R)*(months? m/months:0);
+  const y=(c)=> T+(H-T-B)*(1 - (peak? c/peak:0));
+  // gridlines: label stride widens with plan length so a 240-month plan
+  // on a phone never smears (12/24/60-month steps, review fix 2 Sep 2026)
+  const labelW=34;
+  let step=12;
+  while(step<months && (x(step)-x(0))<labelW) step += (step<24?12:(step<60?36:60));
+  ctx.strokeStyle="#e4ebf2"; ctx.fillStyle="#5c7a94"; ctx.font="11px Segoe UI"; ctx.lineWidth=1;
+  for(let m=step;m<=months;m+=step){ ctx.beginPath(); ctx.moveTo(x(m),T); ctx.lineTo(x(m),H-B); ctx.stroke(); ctx.fillText((m%12===0)? (m/12)+"y" : m+"m", x(m)-8, H-12); }
+  for(const c of [peak, peak/2]){ ctx.beginPath(); ctx.moveTo(L,y(c)); ctx.lineTo(W-R,y(c)); ctx.stroke(); ctx.fillText(fmt(Math.round(c)).replace(/\.\d\d$/,""), 4, y(c)+4); }
+  ctx.beginPath(); ctx.moveTo(L,y(0)); ctx.lineTo(W-R,y(0)); ctx.strokeStyle="#c4d2df"; ctx.stroke(); ctx.fillText("$0", 4, y(0)+4);
+  function line(curve, color, dash){
+    ctx.beginPath(); ctx.setLineDash(dash||[]);
+    curve.forEach((c,m)=>{ if(m===0) ctx.moveTo(x(m),y(c)); else ctx.lineTo(x(m),y(c)); });
+    ctx.strokeStyle=color; ctx.lineWidth=2.5; ctx.stroke(); ctx.setLineDash([]);
+  }
+  if(a) line(a.curve_c, "#9db4c8", [6,4]);
+  line(p.curve_c, "#14395b");
+  // legend on a readable chip (it sat naked on the curve on small screens)
+  const lw = a? 200 : 120;
+  ctx.fillStyle="rgba(255,255,255,.88)"; ctx.fillRect(W-lw-8, T, lw, a? 34:18);
+  ctx.fillStyle="#14395b"; ctx.fillRect(W-lw,T+6,18,3); ctx.fillText(cap(state.mode), W-lw+24, T+12);
+  if(a){ ctx.fillStyle="#9db4c8"; ctx.fillRect(W-lw,T+22,18,3); ctx.fillStyle="#5c7a94"; ctx.fillText(cap(d.other)+" (dashed)", W-lw+24, T+28); }
+}
+
+// ---------- save / load ----------
+function download(){
+  if(IS_DEMO) return;
+  delete state.dropped;
+  state.meta = {app_version:APP_VERSION, saved_at:new Date().toISOString()};
+  const blob=new Blob([JSON.stringify(state,null,1)],{type:"application/json"});
+  const a=el("a",{href:URL.createObjectURL(blob), download:"debt-payoff-app-save.json"});
+  document.body.append(a); a.click(); a.remove();
+  dirty=false; $("#savebanner").classList.remove("show");
+}
+function loadFile(file){
+  if(IS_DEMO) return flash("The demo can’t load files — the full app can", true);
+  // a save file is a few KB; anything huge is the wrong file and would
+  // freeze the tab mid-parse (review fix 2 Sep 2026)
+  if(file.size > 2_000_000) return flash("That file is too big to be a Debt Payoff App save — pick the small .json file the app saved", true);
+  if(dirty && !window.confirm("Loading replaces the numbers on screen, and you have unsaved changes. Load anyway?")) return;
+  const rd=new FileReader();
+  rd.onload=()=>{ try{
+      state=importState(JSON.parse(rd.result)); dirty=false; $("#savebanner").classList.remove("show"); cacheState(); render();
+      const droppedN = state.dropped; delete state.dropped;
+      if(droppedN) flash("Loaded — but that file held "+(state.debts.length+droppedN)+" debts and this app plans "+MAX_DEBTS+", so the first "+state.debts.length+" were kept", true);
+      else flash("Loaded ✔");
+    }
+    catch(e){
+      // plain words, never parser jargon (review fix 2 Sep 2026)
+      const msg = (e && /Debt Payoff App/.test(e.message))? e.message : "that doesn’t look like a Debt Payoff App save file";
+      flash("Couldn’t load that file — "+msg+". Pick the .json file the app saved.", true); } };
+  rd.readAsText(file);
+}
+function flash(msg, bad){ const f=$("#flash"); f.textContent=msg; f.className="flash show"+(bad?" bad":""); setTimeout(()=>f.classList.remove("show"), 3500); }
+
+window.addEventListener("beforeunload",(e)=>{ if(dirty && !IS_DEMO){ e.preventDefault(); e.returnValue=""; } });
+/* Redraw only when the WIDTH changes: on phones, focusing an input opens
+ * the soft keyboard, which fires a HEIGHT-only resize - re-rendering
+ * there wiped the field mid-typing (critical review fix, 2 Sep 2026). */
+let lastW = window.innerWidth;
+window.addEventListener("resize",()=>{ if(window.innerWidth!==lastW){ lastW=window.innerWidth; renderOutputs(); } });
+
+// ---------- boot ----------
+function boot(){
+  state = (!IS_DEMO && loadCache()) || defaultState();
+  if(IS_DEMO){ state = importState(DEMO_SEED); }
+  delete state.dropped;
+  $("#adddebt").addEventListener("click",()=>{
+    if(IS_DEMO && state.debts.length>=3) return flash("The demo is capped at 3 debts — the full app takes 8", true);
+    if(state.debts.length>=MAX_DEBTS) return flash("This plan holds "+MAX_DEBTS+" debts — that’s the design cap", true);
+    state.debts.push({name:"", balance_c:0, rate_cp:0, min_c:0}); markDirty(true); });
+  $("#extra").addEventListener("change",()=>{
+    const r=E.parseMoney($("#extra").value, "Extra per month", true);
+    if(!r.ok){ flash(r.msg, true); $("#extra").value = state.extra_c? (state.extra_c/100).toFixed(2):""; return; }
+    state.extra_c=r.cents; $("#extra").value = r.blank? "" : (r.cents/100).toFixed(2); markDirty(); });
+  $$("input[name=mode]").forEach(rb=>rb.addEventListener("change",()=>{ if(rb.checked){ state.mode=rb.value; markDirty(); } }));
+  $("#savebtn").addEventListener("click", download);
+  $("#loadbtn").addEventListener("click", ()=>$("#loadfile").click());
+  $("#loadfile").addEventListener("change",(e)=>{ if(e.target.files[0]) loadFile(e.target.files[0]); e.target.value=""; });
+  document.body.addEventListener("dragover",(e)=>{ e.preventDefault(); });
+  document.body.addEventListener("drop",(e)=>{ e.preventDefault(); if(e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]); });
+  $$(".tabbtn").forEach(b=>b.addEventListener("click",()=>{
+    $$(".tabbtn").forEach(x=>x.classList.toggle("on", x===b));
+    $$(".tab").forEach(t=>t.classList.toggle("show", t.id==="tab-"+b.dataset.t));
+    renderOutputs();   // the curve canvas has zero width while hidden
+  }));
+  // save/storage messages are meaningless in the demo (Save/Load are
+  // disabled) - never show a message pointing at a dead button (review
+  // fix 2 Sep 2026)
+  if(!storageOK && !IS_DEMO){ $("#storagewarn").classList.add("show"); }
+  if(IS_DEMO){ $("#savebtn").disabled=true; $("#loadbtn").disabled=true; }
+  render();
+}
+document.addEventListener("DOMContentLoaded", boot);
+
+</script>
+</body>
+</html>
